@@ -18,7 +18,8 @@ ffmpeg -f lavfi -i smptebars=size=1920x1080:rate=30 \
        -c:a aac -b:a 128k \
        -f mpegts output.ts
 ```
-→ SMPTE-Balken → gut zum Testen von Farbräumen, Helligkeit/Kontrast
+→ SMPTE-Balken  
+→ gut zum Testen von Farbräumen, Helligkeit/Kontrast
 ## 3️⃣ Bewegtes Testbild (testsrc2)
 ```bash
 ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=30 \
@@ -27,7 +28,8 @@ ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=30 \
        -c:a aac -b:a 128k \
        -f mpegts output.ts
 ```
-→ testsrc2 hat Bewegung → gut zum Encoder-Stresstest (GOP-Effizienz prüfen)
+→ testsrc2 hat Bewegung  
+→ gut zum Encoder-Stresstest (GOP-Effizienz prüfen)  
 ## 4️⃣ Rauschen / Stresstest für Encoder
 ```bash
 ffmpeg -f lavfi -i nullsrc=size=1920x1080:rate=30 \
@@ -37,7 +39,8 @@ ffmpeg -f lavfi -i nullsrc=size=1920x1080:rate=30 \
        -an \
        -f mpegts output.ts
 ```
-→ Weißes Rauschen über Schwarz → maximal schlechte Kompression → Worst-Case-Test
+→ Weißes Rauschen über Schwarz  
+→ maximal schlechte Kompression → Worst-Case-Test  
 ## 5️⃣ Schwarzbild + Stumm (nur leeres Video)
 ```bash
 ffmpeg -f lavfi -i color=color=black:size=1920x1080:rate=30 \
@@ -45,7 +48,8 @@ ffmpeg -f lavfi -i color=color=black:size=1920x1080:rate=30 \
        -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v 1M \
        -f mpegts output.ts
 ```
-→ Minimaler Stream (leerer schwarzer Stream) → praktisch für Latenztests / Dummy-Streams
+→ Minimaler Stream (leerer schwarzer Stream)  
+→ praktisch für Latenztests / Dummy-Streams
 ## 6️⃣ Moving Clock / Timer im Video
 ```bash
 ffmpeg -f lavfi -i testsrc=size=1920x1080:rate=30 \
@@ -54,7 +58,8 @@ ffmpeg -f lavfi -i testsrc=size=1920x1080:rate=30 \
        -an \
        -f mpegts output.ts
 ```
-→ Live-Zeit eingeblendet → super für Sync- und Latenztests bei mehreren Streams!
+→ Live-Zeit eingeblendet  
+→ super für Sync- und Latenztests bei mehreren Streams!
 ## 7️⃣ testsrc2 + Bewegungsunschärfe → simuliert sportliche Bewegung
 ```bash
 ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
