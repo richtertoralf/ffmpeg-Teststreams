@@ -8,7 +8,7 @@ ffmpeg -f lavfi -i testsrc=duration=3600:size=1920x1080:rate=30 \
        -c:a aac -b:a 128k -ar 44100 \
        -f mpegts output.ts
 ```
-→ Standard testsrc, 1h lang, 1920x1080@30fps, 2 MBit Video, 1000 Hz Sinus-Ton
+→ Standard testsrc, 1h lang, 1920x1080@30fps, 2 MBit Video, 1000 Hz Sinus-Ton  
 Ziel: Player-Test, Decoder-Test
 ## 2️⃣ Buntes Testbild (smptebars) + Sinuston
 ```bash
@@ -55,3 +55,56 @@ ffmpeg -f lavfi -i testsrc=size=1920x1080:rate=30 \
        -f mpegts output.ts
 ```
 → Live-Zeit eingeblendet → super für Sync- und Latenztests bei mehreren Streams!
+## 7️⃣ testsrc2 + Bewegungsunschärfe → simuliert sportliche Bewegung
+```bash
+ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
+       -vf "minterpolate='mc_mode=mi',format=yuv420p" \
+       -vcodec libx264 -preset veryfast -b:v 4M \
+       -an \
+       -f mpegts output.ts
+```
+👉 Bewegtes Testbild, künstlich "flüssiger" durch Motion Compensation  
+→ Sehr brauchbar für Sport → Decoder-Last hoch  
+→ z.B. 50 fps bei 4 Mbit → realistisch für deine Streams  
+## 8️⃣ smptebars + random noise overlay → hohe Bewegung / Detail
+```bash
+ffmpeg -f lavfi -i smptebars=size=1920x1080:rate=30 \
+       -f lavfi -i cellauto=size=1920x1080:rate=30 \
+       -filter_complex "[0:v][1:v]overlay=format=yuv420" \
+       -vcodec libx264 -preset veryfast -b:v 2M \
+       -an \
+       -f mpegts output.ts
+```
+👉 SMPTE Balken + animiertes Zellmuster → dauernde Bildveränderung  
+→ Encoder- und Decoder-Stresstest  
+→ Gut für 2 Mbit/s Sportprofil  
+## 9️⃣ Vollbild Noise (maximale Bewegung) → worst case
+```bash
+ffmpeg -f lavfi -i anoisesrc=color=white:size=1920x1080:rate=30 \
+       -vcodec libx264 -preset veryfast -b:v 1M \
+       -an \
+       -f mpegts output.ts
+```
+👉 Weißes Rauschen → maximal schlecht komprimierbar  
+→ Ideal für 1 Mbit Profil testen → bleibt Decoder stabil?  
+## 🔟 testsrc2 + Sinus-Ton → "Sport-Teststream normal"
+```bash
+ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
+       -f lavfi -i sine=frequency=1000 \
+       -vcodec libx264 -preset ultrafast -b:v 2M \
+       -c:a aac -b:a 128k \
+       -f mpegts output.ts
+```
+👉 Bewegung + Ton → so wie dein typischer Sportstream  
+→ 50 fps + 2 Mbit  
+## 1️⃣1️⃣ Testsrc2 + Random Texte (simuliert Scoreboard / Bauchbinde)
+```bash
+ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
+       -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}':fontsize=60:fontcolor=white:x=100:y=50" \
+       -vcodec libx264 -preset ultrafast -b:v 4M \
+       -an \
+       -f mpegts output.ts
+```
+👉 Bewegung + Lauftext / Scoreboard  
+→ typisch Sportübertragung  
+→ 4 Mbit Profil  
