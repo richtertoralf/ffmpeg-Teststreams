@@ -104,7 +104,8 @@ ffmpeg -f lavfi -i anoisesrc=color=white:size=1920x1080:rate=30 \
        -f mpegts output.ts
 ```
 👉 Weißes Rauschen → maximal schlecht komprimierbar  
-→ Ideal für 1 Mbit Profil testen → bleibt Decoder stabil?  
+→ Ideal für 1 Mbit Profil testen  
+→ bleibt Decoder stabil?  
 ## 🔟 testsrc2 + Sinus-Ton → "Sport-Teststream normal"
 `testpattern-sport`
 ```bash
@@ -114,7 +115,8 @@ ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
        -c:a aac -b:a 128k \
        -f mpegts output.ts
 ```
-👉 Bewegung + Ton → so wie dein typischer Sportstream  
+👉 Bewegung + Ton  
+→ so wie dein typischer Sportstream  
 → 50 fps + 2 Mbit  
 ## 1️⃣1️⃣ Testsrc2 + Random Texte (simuliert Scoreboard / Bauchbinde)
 `testpattern-scoreboard`
