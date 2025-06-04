@@ -1,5 +1,9 @@
 # ffmpeg-Teststreams
-Varianten von Teststreams die direkt mit ffmpeg erzeugt werden können
+Varianten von Teststreams die direkt mit ffmpeg erzeugt werden können  
+>>anstatt von -f mpegts output.ts in den folgenden Beispielen das Streamingziel einsetzen, z.B.
+>>srt://x.x.x.x:port
+>>rtmp://x.x.x.x
+
 ## 1️⃣ Einfaches Testbild + Sinuston
 ```bash
 ffmpeg -f lavfi -i testsrc=duration=3600:size=1920x1080:rate=30 \
