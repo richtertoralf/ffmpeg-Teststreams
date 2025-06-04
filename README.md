@@ -1,6 +1,6 @@
 # ffmpeg-Teststreams
 Varianten von Teststreams die direkt mit ffmpeg erzeugt werden können  
->anstatt von `-f mpegts output.ts` in den folgenden Beispielen das Streamingziel einsetzen, z.B.
+>anstatt von `-f mpegts output.ts` in den folgenden Beispielen das Streamingziel einsetzen, z.B.  
 >`srt://x.x.x.x:port`  
 >`rtmp://x.x.x.x`
 
