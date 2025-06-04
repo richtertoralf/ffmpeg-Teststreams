@@ -5,6 +5,7 @@ Varianten von Teststreams die direkt mit ffmpeg erzeugt werden können
 >`rtmp://x.x.x.x`
 
 ## 1️⃣ Einfaches Testbild + Sinuston
+`testpattern-basic`
 ```bash
 ffmpeg -f lavfi -i testsrc=duration=3600:size=1920x1080:rate=30 \
        -f lavfi -i sine=frequency=1000:sample_rate=44100 \
@@ -15,6 +16,7 @@ ffmpeg -f lavfi -i testsrc=duration=3600:size=1920x1080:rate=30 \
 → Standard testsrc, 1h lang, 1920x1080@30fps, 2 MBit Video, 1000 Hz Sinus-Ton  
 Ziel: Player-Test, Decoder-Test
 ## 2️⃣ Buntes Testbild (smptebars) + Sinuston
+`testpattern-smptebars`
 ```bash
 ffmpeg -f lavfi -i smptebars=size=1920x1080:rate=30 \
        -f lavfi -i sine=frequency=1000 \
@@ -25,6 +27,7 @@ ffmpeg -f lavfi -i smptebars=size=1920x1080:rate=30 \
 → SMPTE-Balken  
 → gut zum Testen von Farbräumen, Helligkeit/Kontrast
 ## 3️⃣ Bewegtes Testbild (testsrc2)
+`testpattern-motion`
 ```bash
 ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=30 \
        -f lavfi -i sine=frequency=1000 \
@@ -35,6 +38,7 @@ ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=30 \
 → testsrc2 hat Bewegung  
 → gut zum Encoder-Stresstest (GOP-Effizienz prüfen)  
 ## 4️⃣ Rauschen / Stresstest für Encoder
+`testpattern-noise`
 ```bash
 ffmpeg -f lavfi -i nullsrc=size=1920x1080:rate=30 \
        -f lavfi -i anoisesrc=color=white \
@@ -46,6 +50,7 @@ ffmpeg -f lavfi -i nullsrc=size=1920x1080:rate=30 \
 → Weißes Rauschen über Schwarz  
 → maximal schlechte Kompression → Worst-Case-Test  
 ## 5️⃣ Schwarzbild + Stumm (nur leeres Video)
+`testpattern-black`
 ```bash
 ffmpeg -f lavfi -i color=color=black:size=1920x1080:rate=30 \
        -an \
@@ -55,6 +60,7 @@ ffmpeg -f lavfi -i color=color=black:size=1920x1080:rate=30 \
 → Minimaler Stream (leerer schwarzer Stream)  
 → praktisch für Latenztests / Dummy-Streams
 ## 6️⃣ Moving Clock / Timer im Video
+`testpattern-clock`
 ```bash
 ffmpeg -f lavfi -i testsrc=size=1920x1080:rate=30 \
        -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{localtime}':fontsize=60:fontcolor=white:x=100:y=100" \
@@ -65,6 +71,7 @@ ffmpeg -f lavfi -i testsrc=size=1920x1080:rate=30 \
 → Live-Zeit eingeblendet  
 → super für Sync- und Latenztests bei mehreren Streams!
 ## 7️⃣ testsrc2 + Bewegungsunschärfe → simuliert sportliche Bewegung
+`testpattern-sport-motion`
 ```bash
 ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
        -vf "minterpolate='mc_mode=mi',format=yuv420p" \
@@ -76,6 +83,7 @@ ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
 → Sehr brauchbar für Sport → Decoder-Last hoch  
 → z.B. 50 fps bei 4 Mbit → realistisch für deine Streams  
 ## 8️⃣ smptebars + random noise overlay → hohe Bewegung / Detail
+`testpattern-smpte-noise`
 ```bash
 ffmpeg -f lavfi -i smptebars=size=1920x1080:rate=30 \
        -f lavfi -i cellauto=size=1920x1080:rate=30 \
@@ -88,6 +96,7 @@ ffmpeg -f lavfi -i smptebars=size=1920x1080:rate=30 \
 → Encoder- und Decoder-Stresstest  
 → Gut für 2 Mbit/s Sportprofil  
 ## 9️⃣ Vollbild Noise (maximale Bewegung) → worst case
+`testpattern-full-noise`
 ```bash
 ffmpeg -f lavfi -i anoisesrc=color=white:size=1920x1080:rate=30 \
        -vcodec libx264 -preset veryfast -b:v 1M \
@@ -97,6 +106,7 @@ ffmpeg -f lavfi -i anoisesrc=color=white:size=1920x1080:rate=30 \
 👉 Weißes Rauschen → maximal schlecht komprimierbar  
 → Ideal für 1 Mbit Profil testen → bleibt Decoder stabil?  
 ## 🔟 testsrc2 + Sinus-Ton → "Sport-Teststream normal"
+`testpattern-sport`
 ```bash
 ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
        -f lavfi -i sine=frequency=1000 \
@@ -107,6 +117,7 @@ ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
 👉 Bewegung + Ton → so wie dein typischer Sportstream  
 → 50 fps + 2 Mbit  
 ## 1️⃣1️⃣ Testsrc2 + Random Texte (simuliert Scoreboard / Bauchbinde)
+`testpattern-scoreboard`
 ```bash
 ffmpeg -f lavfi -i testsrc2=size=1920x1080:rate=50 \
        -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}':fontsize=60:fontcolor=white:x=100:y=50" \
