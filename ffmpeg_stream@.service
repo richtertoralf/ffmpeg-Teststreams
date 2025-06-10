@@ -1,0 +1,14 @@
+[Unit]
+Description=FFmpeg Test Stream (%i)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ffmpeg_teststream.sh %i
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
