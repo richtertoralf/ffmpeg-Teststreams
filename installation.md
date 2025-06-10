@@ -22,10 +22,19 @@ sudo apt update && sudo apt install ffmpeg jq curl -y
 sudo mkdir -p /usr/local/bin
 sudo nano /usr/local/bin/ffmpeg_teststream.sh
 sudo chmod +x /usr/local/bin/ffmpeg_teststream.sh
+```
+
+---
 
 ## 📁 Konfiguration
 
 ```bash
 sudo mkdir -p /etc/ffmpeg_streams
 sudo nano /etc/ffmpeg_streams/testpattern-sport.ini
+```
+
+## 🖥️ Systemd-Unit erstellen
+
+```bash
+sudo nano /etc/systemd/system/ffmpeg_stream@.service
 ```
