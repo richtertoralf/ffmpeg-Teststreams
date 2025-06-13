@@ -62,7 +62,7 @@ WantedBy=multi-user.target
 ```
 
 ## 🛠 manage-teststreams.sh – Steuerung aller Streams
-Das zusätzliche Skript manage-teststreams.sh dient zur bequemen Steuerung und Überprüfung aller .ini-Streams.
+Das Zusatzskript manage-teststreams.sh erleichtert das Starten, Stoppen und Auflisten aller Streams.
 
 ```bash
 sudo cp manage-teststreams.sh /usr/local/bin/
@@ -70,14 +70,26 @@ sudo chmod +x /usr/local/bin/manage-teststreams.sh
 ```
 ### Verfügbare Befehle
 ```bash
-sudo manage-teststreams.sh start      # Startet alle Streams
-sudo manage-teststreams.sh stop       # Stoppt alle laufenden Streams
-sudo manage-teststreams.sh restart    # Startet alle Streams neu
-sudo manage-teststreams.sh status     # Zeigt systemctl-Status für alle
-sudo manage-teststreams.sh running    # Listet nur aktive Streams
-sudo manage-teststreams.sh list       # Zeigt alle verfügbaren INI-Dateien
+sudo manage-teststreams.sh list
+# Zeigt alle verfügbaren Streams laut .ini-Dateien
+
+sudo manage-teststreams.sh running
+# Zeigt alle derzeit aktiven systemd-Dienste
+
+sudo manage-teststreams.sh start <name>
+# Startet den Stream mit dem angegebenen Namen
+
+sudo manage-teststreams.sh stop <name>
+# Stoppt den Stream mit dem angegebenen Namen
+
+sudo manage-teststreams.sh start-all
+# Startet alle Streams mit .ini-Datei
+
+sudo manage-teststreams.sh stop-all
+# Stoppt alle laufenden Streams
+
 ```
-Das Skript basiert auf den .ini-Dateien in /etc/ffmpeg_streams/ und erkennt automatisch, welche systemd-Units dazugehören.
+Diese Steuerung greift automatisch auf alle .ini-Dateien im Verzeichnis /etc/ffmpeg_streams/ zu und nutzt systemctl zur Verwaltung der Dienste.
 
 ## 🔍 Empfehlung nach Einsatzzweck
 
