@@ -1,12 +1,19 @@
 #!/bin/bash
 set -e
 
-# ============================
-# FFmpeg Teststream Generator
-# ============================
+# ============================================
+# FFmpeg Teststream Generator für SRT-Ausgabe
+# ============================================
 # Aufruf: ./ffmpeg_teststream.sh <stream-name>
 # Erwartet eine .ini-Datei in /etc/ffmpeg_streams/<stream-name>.ini
-# mit den Variablen: TARGET_HOST, TARGET_PORT, STREAM_ID, TYPE, FPS, BITRATE
+# mit folgenden Variablen:
+#   - TARGET_HOST, TARGET_PORT
+#   - STREAM_ID
+#   - TYPE (z. B. basic, motion, clock, ...)
+#   - FPS (z. B. 25, 30, 50)
+#   - BITRATE (z. B. 2M)
+#
+# Optional: WIDTH, HEIGHT, AUDIO_ENABLED, DURATION, PRESET
 
 NAME="$1"
 CONFIG="/etc/ffmpeg_streams/${NAME}.ini"
@@ -17,103 +24,93 @@ if [ -z "$NAME" ]; then
 fi
 
 if [ ! -f "$CONFIG" ]; then
-    echo "Config file $CONFIG not found"
+    echo "❌ Config file $CONFIG not found"
     exit 1
 fi
 
-# Konfiguration einlesen
+# INI-Datei laden
 source "$CONFIG"
 
-# Ziel-URL zusammensetzen
+# Standardwerte setzen
 URL="srt://${TARGET_HOST}:${TARGET_PORT}?streamid=publish:${STREAM_ID}&pkt_size=1316"
+PRESET=${PRESET:-ultrafast}
+WIDTH=${WIDTH:-1920}
+HEIGHT=${HEIGHT:-1080}
+FPS=${FPS:-30}
+DURATION=${DURATION:-3600}
+BITRATE=${BITRATE:-2M}
+AUDIO_ENABLED=${AUDIO_ENABLED:-yes}
 
-# Info-Ausgabe
-echo "Starting FFmpeg stream: ${NAME}"
-echo "Target: $URL"
-echo "Type: $TYPE | FPS: $FPS | BITRATE: $BITRATE"
+# Infoausgabe
+echo "🎬 Starting FFmpeg stream: $NAME"
+echo "→ URL:      $URL"
+echo "→ TYPE:     $TYPE"
+echo "→ FPS:      $FPS"
+echo "→ BITRATE:  $BITRATE"
+echo "→ PRESET:   $PRESET"
+echo "→ AUDIO:    $AUDIO_ENABLED"
 
-# FFmpeg je nach TYPE starten
+# Typbezogene Video- und Audioquellen vorbereiten
 case "$TYPE" in
     basic)
-        ffmpeg -re -f lavfi -i "testsrc=size=1920x1080:rate=${FPS}" \
-               -f lavfi -i "sine=frequency=1000" \
-               -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v "$BITRATE" \
-               -c:a aac -b:a 128k -ar 44100 \
-               -f mpegts "$URL"
-        ;;
-    motion)
-        ffmpeg -re -f lavfi -i "testsrc2=size=1920x1080:rate=${FPS}" \
-               -f lavfi -i "sine=frequency=1000" \
-               -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v "$BITRATE" \
-               -c:a aac -b:a 128k -ar 44100 \
-               -f mpegts "$URL"
-        ;;
-    sport)
-        ffmpeg -re -f lavfi -i "testsrc2=size=1920x1080:rate=${FPS}" \
-               -f lavfi -i "sine=frequency=1000" \
-               -vcodec libx264 -preset ultrafast -b:v "$BITRATE" \
-               -c:a aac -b:a 128k \
-               -f mpegts "$URL"
-        ;;
-    scoreboard)
-        ffmpeg -re -f lavfi -i "testsrc2=size=1920x1080:rate=${FPS}" \
-               -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{pts\\:hms} SCORE %{eif\\:random(100)}-%{eif\\:random(100)}':fontsize=60:fontcolor=white:x=100:y=100" \
-               -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v "$BITRATE" \
-               -an \
-               -f mpegts "$URL"
-        ;;
-    black)
-        ffmpeg -re -f lavfi -i "color=black:size=1920x1080:rate=${FPS}" \
-               -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v "$BITRATE" \
-               -an \
-               -f mpegts "$URL"
-        ;;
-    clock)
-        ffmpeg -re -f lavfi -i "testsrc=size=1920x1080:rate=${FPS}" \
-               -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{localtime}':fontsize=60:fontcolor=white:x=100:y=100" \
-               -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v "$BITRATE" \
-               -an \
-               -f mpegts "$URL"
-        ;;
-    sport-motion)
-        ffmpeg -re -f lavfi -i "testsrc2=size=1920x1080:rate=${FPS}" \
-               -vf "minterpolate='mc_mode=mi',format=yuv420p" \
-               -vcodec libx264 -preset veryfast -b:v "$BITRATE" \
-               -an \
-               -f mpegts "$URL"
+        VIDEO_ARGS=(-f lavfi -i "testsrc=duration=${DURATION}:size=${WIDTH}x${HEIGHT}:rate=${FPS}")
         ;;
     smptebars)
-        ffmpeg -re -f lavfi -i "smptebars=size=1920x1080:rate=${FPS}" \
-               -f lavfi -i "sine=frequency=1000" \
-               -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v "$BITRATE" \
-               -c:a aac -b:a 128k \
-               -f mpegts "$URL"
+        VIDEO_ARGS=(-f lavfi -i "smptebars=size=${WIDTH}x${HEIGHT}:rate=${FPS}")
+        ;;
+    motion)
+        VIDEO_ARGS=(-f lavfi -i "testsrc2=size=${WIDTH}x${HEIGHT}:rate=${FPS}")
         ;;
     noise)
-        ffmpeg -re -f lavfi -i "nullsrc=size=1920x1080:rate=${FPS}" \
-               -f lavfi -i "anoisesrc=color=white" \
-               -filter_complex "[0:v][1:v]overlay=format=yuv420" \
-               -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v "$BITRATE" \
-               -an \
-               -f mpegts "$URL"
+        VIDEO_ARGS=(-f lavfi -i "nullsrc=size=${WIDTH}x${HEIGHT}:rate=${FPS},format=yuv420p")
         ;;
-    full-noise)
-        ffmpeg -re -f lavfi -i "anoisesrc=color=white:size=1920x1080:rate=${FPS}" \
-               -vcodec libx264 -preset veryfast -b:v "$BITRATE" \
-               -an \
-               -f mpegts "$URL"
+    black)
+        VIDEO_ARGS=(-f lavfi -i "color=black:size=${WIDTH}x${HEIGHT}:rate=${FPS}")
+        ;;
+    clock)
+        VIDEO_ARGS=(-f lavfi -i "testsrc=size=${WIDTH}x${HEIGHT}:rate=${FPS},drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{localtime}':fontsize=60:fontcolor=white:x=100:y=100")
+        ;;
+    sport-motion)
+        VIDEO_ARGS=(-f lavfi -i "testsrc2=size=${WIDTH}x${HEIGHT}:rate=${FPS},minterpolate=mc_mode=aobmc:vsbmc=1,format=yuv420p")
         ;;
     smpte-noise)
-        ffmpeg -re -f lavfi -i "smptebars=size=1920x1080:rate=${FPS}" \
-               -f lavfi -i "cellauto=size=1920x1080:rate=${FPS}" \
-               -filter_complex "[0:v][1:v]overlay=format=yuv420" \
-               -vcodec libx264 -preset veryfast -b:v "$BITRATE" \
-               -an \
-               -f mpegts "$URL"
+        VIDEO_ARGS=(
+            -f lavfi -i "smptebars=size=${WIDTH}x${HEIGHT}:rate=${FPS}"
+            -f lavfi -i "cellauto=size=${WIDTH}x${HEIGHT}:rate=${FPS}"
+        )
+        FILTER_COMPLEX="[0:v][1:v]overlay,format=yuv420p"
+        ;;
+    full-noise)
+        VIDEO_ARGS=(-f lavfi -i "cellauto=size=${WIDTH}x${HEIGHT}:rate=${FPS}")
+        ;;
+    sport)
+        VIDEO_ARGS=(-f lavfi -i "testsrc2=size=${WIDTH}x${HEIGHT}:rate=${FPS}")
+        ;;
+    scoreboard)
+        VIDEO_ARGS=(-f lavfi -i "testsrc2=size=${WIDTH}x${HEIGHT}:rate=${FPS},drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}':fontsize=60:fontcolor=white:x=100:y=50")
         ;;
     *)
-        echo "Unknown TYPE: $TYPE"
-        echo "Valid types: basic, motion, sport, scoreboard, black, clock, sport-motion, smptebars, noise, full-noise, smpte-noise"
+        echo "❌ Unknown TYPE: $TYPE"
+        echo "ℹ️  Valid types: basic, smptebars, motion, noise, black, clock, sport-motion, smpte-noise, full-noise, sport, scoreboard"
         exit 1
         ;;
 esac
+
+# Audioquelle vorbereiten
+if [ "$AUDIO_ENABLED" = "yes" ]; then
+    AUDIO_ARGS=(-f lavfi -i "sine=frequency=1000" -c:a aac -b:a 128k -ar 44100)
+else
+    AUDIO_ARGS=(-an)
+fi
+
+# FFmpeg-Aufruf zusammensetzen
+if [ "$TYPE" = "smpte-noise" ]; then
+    ffmpeg -re "${VIDEO_ARGS[@]}" "${AUDIO_ARGS[@]}" \
+        -filter_complex "$FILTER_COMPLEX" \
+        -vcodec libx264 -preset "$PRESET" -pix_fmt yuv420p -b:v "$BITRATE" \
+        -f mpegts "$URL"
+else
+    ffmpeg -re "${VIDEO_ARGS[@]}" "${AUDIO_ARGS[@]}" \
+        -vcodec libx264 -preset "$PRESET" -pix_fmt yuv420p -b:v "$BITRATE" \
+        -f mpegts "$URL"
+fi
