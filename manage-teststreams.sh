@@ -1,0 +1,74 @@
+#!/bin/bash
+
+INI_DIR="/etc/ffmpeg_streams"
+UNIT_PREFIX="ffmpeg_stream@"
+SYSTEMCTL="sudo systemctl"
+
+list_streams() {
+    echo "📄 Verfügbare Teststreams (INI-Dateien):"
+    for file in "$INI_DIR"/*.ini; do
+        name=$(basename "$file" .ini)
+        echo "  - $name"
+    done
+}
+
+running_streams() {
+    echo "✅ Aktive Teststreams:"
+    $SYSTEMCTL list-units --type=service --state=running | grep "$UNIT_PREFIX" | awk '{print "  - " $1}'
+}
+
+start_stream() {
+    name="$1"
+    if [ -f "$INI_DIR/$name.ini" ]; then
+        $SYSTEMCTL start "${UNIT_PREFIX}${name}.service" && echo "🔄 gestartet: $name"
+    else
+        echo "❌ Stream $name nicht gefunden."
+    fi
+}
+
+stop_stream() {
+    name="$1"
+    $SYSTEMCTL stop "${UNIT_PREFIX}${name}.service" && echo "⏹️ gestoppt: $name"
+}
+
+start_all() {
+    echo "🚀 Starte alle verfügbaren Teststreams:"
+    for file in "$INI_DIR"/*.ini; do
+        name=$(basename "$file" .ini)
+        $SYSTEMCTL start "${UNIT_PREFIX}${name}.service"
+        echo "  ➤ gestartet: $name"
+    done
+}
+
+stop_all() {
+    echo "🛑 Stoppe alle laufenden Teststreams:"
+    for unit in $($SYSTEMCTL list-units --type=service --state=running | grep "$UNIT_PREFIX" | awk '{print $1}'); do
+        $SYSTEMCTL stop "$unit"
+        echo "  ➤ gestoppt: $unit"
+    done
+}
+
+# Hauptlogik
+case "$1" in
+    list)
+        list_streams
+        ;;
+    running)
+        running_streams
+        ;;
+    start)
+        start_stream "$2"
+        ;;
+    stop)
+        stop_stream "$2"
+        ;;
+    start-all)
+        start_all
+        ;;
+    stop-all)
+        stop_all
+        ;;
+    *)
+        echo "Verwendung: $0 {list|running|start NAME|stop NAME|start-all|stop-all}"
+        ;;
+esac
