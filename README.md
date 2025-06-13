@@ -22,10 +22,15 @@ Erzeuge für jeden Stream eine INI-Datei im Verzeichnis `/etc/ffmpeg_streams/`:
 TYPE=sport
 FPS=50
 BITRATE=2M
+WIDTH=1920
+HEIGHT=1080
+PRESET=ultrafast
+AUDIO_ENABLED=yes
 TARGET_HOST=192.168.95.241
 TARGET_PORT=8890
 STREAM_ID=testpattern-sport
 ```
+Die Parameter WIDTH, HEIGHT, PRESET, AUDIO_ENABLED und DURATION sind optional. Falls sie fehlen, werden im Skript sinnvolle Standardwerte gesetzt.
 
 ## 🚀 Starten eines Streams
 
@@ -33,7 +38,7 @@ STREAM_ID=testpattern-sport
 sudo systemctl start ffmpeg_stream@testpattern-sport
 ```
 
-Beim Start wird die Datei `/etc/ffmpeg_streams/testpattern-sport.ini` geladen und an das Bash-Skript `/usr/local/bin/ffmpeg_teststream.sh` übergeben. Dieses startet den passenden FFmpeg-Befehl basierend auf dem `TYPE`.
+Das lädt die Datei /etc/ffmpeg_streams/testpattern-sport.ini und übergibt sie an /usr/local/bin/ffmpeg_teststream.sh, das den entsprechenden FFmpeg-Befehl startet.
 
 ## 📜 systemd Unit-Datei
 
@@ -56,6 +61,24 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
+## 🛠 manage-teststreams.sh – Steuerung aller Streams
+Das zusätzliche Skript manage-teststreams.sh dient zur bequemen Steuerung und Überprüfung aller .ini-Streams.
+
+```bash
+sudo cp manage-teststreams.sh /usr/local/bin/
+sudo chmod +x /usr/local/bin/manage-teststreams.sh
+```
+### Verfügbare Befehle
+```bash
+sudo manage-teststreams.sh start      # Startet alle Streams
+sudo manage-teststreams.sh stop       # Stoppt alle laufenden Streams
+sudo manage-teststreams.sh restart    # Startet alle Streams neu
+sudo manage-teststreams.sh status     # Zeigt systemctl-Status für alle
+sudo manage-teststreams.sh running    # Listet nur aktive Streams
+sudo manage-teststreams.sh list       # Zeigt alle verfügbaren INI-Dateien
+```
+Das Skript basiert auf den .ini-Dateien in /etc/ffmpeg_streams/ und erkennt automatisch, welche systemd-Units dazugehören.
+
 ## 🔍 Empfehlung nach Einsatzzweck
 
 | Name                     | Nutzen                                              | Empfehlung                                         |
@@ -72,7 +95,7 @@ WantedBy=multi-user.target
 | testpattern-sport        | Bewegtes Testbild + Ton                             | ✅ Ideal für realistische Sporttests                |
 | testpattern-scoreboard   | Bewegung + Lauftext                                 | ✅ Simuliert echten Sportstream mit Anzeige         |
 
-## 🔗 Zusammenhang: Skript, INI, systemd
+## 🔗 Zusammenspiel: systemd – Skript – INI
 
 - Das **systemd-Template** `ffmpeg_stream@.service` startet `/usr/local/bin/ffmpeg_teststream.sh <name>`
 - Das Bash-**Skript** liest die passende `.ini`-Datei aus `/etc/ffmpeg_streams/<name>.ini`
