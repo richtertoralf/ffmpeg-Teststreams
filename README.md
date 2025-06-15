@@ -62,14 +62,16 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-## 🛠 manage-teststreams.sh – Steuerung aller Streams
-Das Zusatzskript manage-teststreams.sh erleichtert das Starten, Stoppen und Auflisten aller Streams.
+## 🛠 manage-teststreams.sh – Steuerung aller Teststreams
+Das Zusatzskript manage-teststreams.sh vereinfacht die Verwaltung aller FFmpeg-Teststreams, die per systemd als Dienst laufen. Es erkennt automatisch alle .ini-Dateien im Verzeichnis /etc/ffmpeg_streams/ und steuert die zugehörigen Dienste über systemctl.
 
+### 📦 Installation
 ```bash
 sudo cp manage-teststreams.sh /usr/local/bin/
 sudo chmod +x /usr/local/bin/manage-teststreams.sh
+
 ```
-### Verfügbare Befehle
+### 🧭 Verfügbare Befehle
 ```bash
 sudo manage-teststreams.sh list
 # Zeigt alle verfügbaren Streams laut .ini-Dateien
@@ -89,8 +91,21 @@ sudo manage-teststreams.sh start-all
 sudo manage-teststreams.sh stop-all
 # Stoppt alle laufenden Streams
 
+sudo manage-teststreams.sh status <name>
+# Zeigt den vollständigen systemctl status für einen bestimmten Stream
+
+sudo manage-teststreams.sh status-all
+→ Zeigt eine komprimierte Übersicht über den Status aller Streams:
+# ✅ → aktiv
+# ⚠️ → inaktiv
+# ❌ → fehlgeschlagen
+# ❓ → unbekannter Status
+
 ```
-Diese Steuerung greift automatisch auf alle .ini-Dateien im Verzeichnis /etc/ffmpeg_streams/ zu und nutzt systemctl zur Verwaltung der Dienste.
+
+>Hinweis:  
+>Alle Streams werden über die Template-Unit ffmpeg_stream@.service gestartet, z. B. ffmpeg_stream@testpattern-basic.service.  
+>Die .ini-Dateien enthalten dabei Konfigurationsparameter wie TYPE, FPS, BITRATE, WIDTH, HEIGHT usw., die das Verhalten des Streams steuern.  
 
 ## 🔍 Empfehlung nach Einsatzzweck
 
