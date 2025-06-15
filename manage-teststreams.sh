@@ -48,6 +48,33 @@ stop_all() {
     done
 }
 
+status_stream() {
+    name="$1"
+    $SYSTEMCTL status "${UNIT_PREFIX}${name}.service"
+}
+
+status_all() {
+    echo "🔍 Statusübersicht:"
+    for file in "$INI_DIR"/*.ini; do
+        name=$(basename "$file" .ini)
+        state=$($SYSTEMCTL is-active "${UNIT_PREFIX}${name}.service")
+        case "$state" in
+            active)
+                echo "  ✅ $name: running"
+                ;;
+            failed)
+                echo "  ❌ $name: failed"
+                ;;
+            inactive)
+                echo "  ⚠️ $name: inactive"
+                ;;
+            *)
+                echo "  ❓ $name: $state"
+                ;;
+        esac
+    done
+}
+
 # Hauptlogik
 case "$1" in
     list)
@@ -68,7 +95,13 @@ case "$1" in
     stop-all)
         stop_all
         ;;
+    status)
+        status_stream "$2"
+        ;;
+    status-all)
+        status_all
+        ;;
     *)
-        echo "Verwendung: $0 {list|running|start NAME|stop NAME|start-all|stop-all}"
+        echo "Verwendung: $0 {list|running|start NAME|stop NAME|start-all|stop-all|status NAME|status-all}"
         ;;
 esac
