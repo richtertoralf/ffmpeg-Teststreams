@@ -167,6 +167,12 @@ journalctl -u ffmpeg_stream@testpattern-sport.service -n 50 --no-pager
 
 ```
 
-## 🔍 Technischer Hinweis zu FFmpeg:
+## 🔍 Technischer Hinweis zu FFmpeg
 FFmpeg wird mit `-re` aufgerufen, um eine realistische Echtzeit-Wiedergabe zu gewährleisten. Du kannst durch Anpassung von `FPS` und `BITRATE` deine Testlast gezielt steuern.
 
+### Beispielaufruf im Skript `ffmpeg_testsream.sh`
+```bash
+    ffmpeg -re "${VIDEO_ARGS[@]}" "${AUDIO_ARGS[@]}" \
+        -vcodec libx264 -preset "$PRESET" -pix_fmt yuv420p -b:v "$BITRATE" \
+        -f mpegts "$URL"
+```
