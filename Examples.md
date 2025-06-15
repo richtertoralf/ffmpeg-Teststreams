@@ -99,16 +99,16 @@ ffmpeg -re -f lavfi -i testsrc2=size=1920x1080:rate=50 \
 
 # 🔍 Empfehlung nach Einsatzzweck
 
-| Name                    | Nutzen                                          | Empfehlung                                      |
-|-------------------------|--------------------------------------------------|--------------------------------------------------|
-| `testpattern-basic`     | Statisches Bild + Ton                           | ✅ Minimal-Check für Encoder/Verbindung          |
-| `testpattern-smptebars` | Farbbalken                                      | ✅ Farbraum-/Kontrasttests                       |
-| `testpattern-motion`    | Bewegtes Testbild                               | ✅ Für allgemeine Bewegung / moderate Belastung  |
-| `testpattern-noise`     | Bild + Rauschen                                 | 🔧 Für Encoder-Stresstest                        |
-| `testpattern-black`     | Schwarzbild, kein Ton                           | ✅ Für Platzhalter oder Latenztests              |
-| `testpattern-clock`     | Testbild mit eingeblendeter Uhrzeit             | ✅ Perfekt für Synchronisation und Vergleich     |
-| `testpattern-sport-motion` | Bewegtes Bild mit Motion Interpolation     | ✅ Für Sport-Streams (hohe Decoder-Last)         |
-| `testpattern-smpte-noise` | SMPTE + Zellmuster                          | 🔧 Belastungstest für Dekoder bei 2 Mbit         |
-| `testpattern-full-noise` | Nur Rauschen                                 | 🔧 Worst-case für Decoder                        |
-| `testpattern-sport`     | Bewegtes Testbild + Ton                         | ✅ Ideal für realistische Sporttests             |
-| `testpattern-scoreboard`| Bewegung + Lauftext                             | ✅ Simuliert echten Sportstream mit Anzeige      |
+| Name                       | Nutzen                   | Empfehlung                              |
+| -------------------------- | ------------------------ | --------------------------------------- |
+| `testpattern-basic`        | Statisches Bild + Ton    | ✅ Minimal-Check für Encoder/Verbindung  |
+| `testpattern-smptebars`    | Farbbalken               | ✅ Farbraum-/Kontrasttests               |
+| `testpattern-motion`       | Bewegtbild               | ✅ Für moderate Bewegung / Encoder-Tests |
+| `testpattern-noise`        | Rauschüberlagerung       | 🔧 Stresstest für Encoder               |
+| `testpattern-black`        | Schwarzbild              | ✅ Platzhalter, Latenzprüfung            |
+| `testpattern-clock`        | Uhrzeit eingeblendet     | ✅ Synchronisations-/Latenzvergleiche    |
+| `testpattern-sport-motion` | Bewegung + Interpolation | ✅ Realistischer Sportstream, hohe Last  |
+| `testpattern-smpte-noise`  | Zellmuster + Balken      | 🔧 Decoder-/Bandbreiten-Stresstest      |
+| `testpattern-full-noise`   | Rauschen (grau)          | 🔧 Worst-case Encoding                  |
+| `testpattern-sport`        | Sport-Testbild + Ton     | ✅ Typischer SRT-Teststream mit Ton      |
+| `testpattern-scoreboard`   | Scoreboard / Bauchbinde  | ✅ Realistische Übertragungssimulation   |
