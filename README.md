@@ -5,8 +5,11 @@ Dieses Repository enthält ein Bash-Skript zur Erzeugung von FFmpeg-Teststreams 
 ## ⚡ Schnellinstallation
 
 ```bash
+sudo apt update
+sudo apt install -y git ffmpeg python3 fonts-dejavu-core
 wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/main/install.sh | bash
 ```
+Diese Befehle klonen das Repository, installieren alle benötigten Skripte, kopieren die systemd-Unit-Datei und erzeugen automatisch Beispiel-INI-Dateien.
 
 ## 🔧 Installation per Hand
 
@@ -20,7 +23,8 @@ sudo systemctl daemon-reexec
 
 ## ⚙️ Konfiguration
 
-Erzeuge für jeden Stream eine INI-Datei im Verzeichnis `/etc/ffmpeg_streams/`:  
+Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.
+
 >Dazu kannst du auch das Skript https://github.com/richtertoralf/ffmpeg-Teststreams/blob/main/ini-gen.py verwenden.
 
 **Beispiel:** `/etc/ffmpeg_streams/testpattern-sport.ini`
@@ -45,7 +49,7 @@ Die Parameter WIDTH, HEIGHT, PRESET, AUDIO_ENABLED und DURATION sind optional. F
 sudo systemctl start ffmpeg_stream@testpattern-sport
 ```
 
-Das lädt die Datei /etc/ffmpeg_streams/testpattern-sport.ini und übergibt sie an /usr/local/bin/ffmpeg_teststream.sh, das den entsprechenden FFmpeg-Befehl startet.
+Dies lädt die Datei /etc/ffmpeg_streams/testpattern-sport.ini und übergibt sie an /usr/local/bin/ffmpeg_teststream.sh, das den passenden FFmpeg-Befehl ausführt.
 
 ## 📜 systemd Unit-Datei
 
@@ -129,9 +133,26 @@ sudo manage-teststreams.sh status-all
 | testpattern-sport        | Bewegtes Testbild + Ton                             | ✅ Ideal für realistische Sporttests                |
 | testpattern-scoreboard   | Bewegung + Lauftext                                 | ✅ Simuliert echten Sportstream mit Anzeige         |
 
-## 🔗 Zusammenspiel: systemd – Skript – INI
+## 🔗 Zusammenspiel: systemd, Skript, INI
 
+```text
+systemd unit → ffmpeg_stream@<name>.service
+        ↓
+Bash-Skript → /usr/local/bin/ffmpeg_teststream.sh <name>
+        ↓
+INI-Datei → /etc/ffmpeg_streams/<name>.ini
+        ↓
+FFmpeg wird mit passenden Filtern, Codecs und Zielen ausgeführt
+
+```
 - Das **systemd-Template** `ffmpeg_stream@.service` startet `/usr/local/bin/ffmpeg_teststream.sh <name>`
 - Das Bash-**Skript** liest die passende `.ini`-Datei aus `/etc/ffmpeg_streams/<name>.ini`
 - Die `.ini` enthält den Typ (z. B. `basic`, `motion`, `scoreboard`), Ziel-IP, Port und Bitrate
 - Je nach Typ wird ein anderer FFmpeg-Befehl ausgeführt
+
+## 🐞 Fehlerdiagnose
+```bash
+# Letzte Logs für einen Stream anzeigen
+journalctl -u ffmpeg_stream@testpattern-sport.service -n 50 --no-pager
+
+```
