@@ -84,32 +84,28 @@ sudo chmod +x /usr/local/bin/manage-teststreams.sh
 ### 🧭 Verfügbare Befehle
 ```bash
 sudo manage-teststreams.sh list
-# Zeigt alle verfügbaren Streams laut .ini-Dateien
+# Zeigt alle verfügbaren Streams (.ini-Dateien)
 
 sudo manage-teststreams.sh running
-# Zeigt alle derzeit aktiven systemd-Dienste
+# Zeigt alle aktiven systemd-Dienste
 
 sudo manage-teststreams.sh start <name>
 # Startet den Stream mit dem angegebenen Namen
 
 sudo manage-teststreams.sh stop <name>
-# Stoppt den Stream mit dem angegebenen Namen
+# Stoppt den Stream
+
+sudo manage-teststreams.sh status <name>
+# Zeigt vollständigen systemctl status für diesen Stream
 
 sudo manage-teststreams.sh start-all
-# Startet alle Streams mit .ini-Datei
+# Startet alle konfigurierten Streams
 
 sudo manage-teststreams.sh stop-all
 # Stoppt alle laufenden Streams
 
-sudo manage-teststreams.sh status <name>
-# Zeigt den vollständigen systemctl status für einen bestimmten Stream
-
 sudo manage-teststreams.sh status-all
-→ Zeigt eine komprimierte Übersicht über den Status aller Streams:
-# ✅ → aktiv
-# ⚠️ → inaktiv
-# ❌ → fehlgeschlagen
-# ❓ → unbekannter Status
+# Kompakter Status aller Streams (✅ ⚠️ ❌ ❓)
 
 ```
 
