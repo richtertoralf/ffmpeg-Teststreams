@@ -2,7 +2,13 @@
 
 Dieses Repository enthält ein Bash-Skript zur Erzeugung von FFmpeg-Teststreams für verschiedene Anwendungszwecke. Die Streams werden über systemd als Dienste verwaltet und basieren auf `.ini`-Konfigurationsdateien.
 
-## 🔧 Installation
+## ⚡ Schnellinstallation
+
+```bash
+wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/main/install.sh | bash
+```
+
+## 🔧 Installation per Hand
 
 ```bash
 sudo mkdir -p /etc/ffmpeg_streams
