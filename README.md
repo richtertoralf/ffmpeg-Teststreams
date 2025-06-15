@@ -2,6 +2,18 @@
 
 Dieses Repository enthält ein Bash-Skript zur Erzeugung von FFmpeg-Teststreams für verschiedene Anwendungszwecke. Die Streams werden über systemd als Dienste verwaltet und basieren auf `.ini`-Konfigurationsdateien.
 
+## 🧪 Getestet auf:
+- Ubuntu 22.04 LTS
+- Ubuntu 24.04 LTS
+- Debian 12
+
+## 🎯 Kompatible Streaming-Empfänger:
+- MediaMTX (SRT → HLS/WebRTC)
+- Datarhei Restreamer
+- NGINX mit RTMP-Modul
+- Wowza Streaming Engine
+- OBS (als SRT-Receiver)
+
 ## ⚡ Schnellinstallation
 
 ```bash
@@ -152,3 +164,7 @@ FFmpeg wird mit passenden Filtern, Codecs und Zielen ausgeführt
 journalctl -u ffmpeg_stream@testpattern-sport.service -n 50 --no-pager
 
 ```
+
+## 🔍 Technischer Hinweis zu FFmpeg:
+FFmpeg wird mit `-re` aufgerufen, um eine realistische Echtzeit-Wiedergabe zu gewährleisten. Du kannst durch Anpassung von `FPS` und `BITRATE` deine Testlast gezielt steuern.
+
