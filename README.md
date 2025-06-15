@@ -14,7 +14,8 @@ sudo systemctl daemon-reexec
 
 ## ⚙️ Konfiguration
 
-Erzeuge für jeden Stream eine INI-Datei im Verzeichnis `/etc/ffmpeg_streams/`:
+Erzeuge für jeden Stream eine INI-Datei im Verzeichnis `/etc/ffmpeg_streams/`:  
+>Dazu kannst du auch das Skript https://github.com/richtertoralf/ffmpeg-Teststreams/blob/main/ini-gen.py verwenden.
 
 **Beispiel:** `/etc/ffmpeg_streams/testpattern-sport.ini`
 
