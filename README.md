@@ -127,22 +127,6 @@ sudo manage-teststreams.sh status-all
 >Alle Streams werden über die Template-Unit ffmpeg_stream@.service gestartet, z. B. ffmpeg_stream@testpattern-basic.service.  
 >Die .ini-Dateien enthalten dabei Konfigurationsparameter wie TYPE, FPS, BITRATE, WIDTH, HEIGHT usw., die das Verhalten des Streams steuern.  
 
-## 🔍 Empfehlung nach Einsatzzweck
-
-| Name                     | Nutzen                                              | Empfehlung                                         |
-|--------------------------|-----------------------------------------------------|----------------------------------------------------|
-| testpattern-basic        | Statisches Bild + Ton                               | ✅ Minimal-Check für Encoder/Verbindung             |
-| testpattern-smptebars    | Farbbalken                                          | ✅ Farbraum-/Kontrasttests                          |
-| testpattern-motion       | Bewegtes Testbild                                   | ✅ Für allgemeine Bewegung / moderate Belastung     |
-| testpattern-noise        | Bild + Rauschen                                     | 🔧 Für Encoder-Stresstest                          |
-| testpattern-black        | Schwarzbild, kein Ton                               | ✅ Für Platzhalter oder Latenztests                 |
-| testpattern-clock        | Testbild mit eingeblendeter Uhrzeit                 | ✅ Perfekt für Synchronisation und Vergleich        |
-| testpattern-sport-motion | Bewegtes Bild mit Motion Interpolation             | ✅ Für Sport-Streams (hohe Decoder-Last)            |
-| testpattern-smpte-noise  | SMPTE + Zellmuster                                  | 🔧 Belastungstest für Dekoder bei 2 Mbit            |
-| testpattern-full-noise   | Nur Rauschen                                        | 🔧 Worst-case für Decoder                          |
-| testpattern-sport        | Bewegtes Testbild + Ton                             | ✅ Ideal für realistische Sporttests                |
-| testpattern-scoreboard   | Bewegung + Lauftext                                 | ✅ Simuliert echten Sportstream mit Anzeige         |
-
 ## 🔗 Zusammenspiel: systemd, Skript, INI
 
 ```text
