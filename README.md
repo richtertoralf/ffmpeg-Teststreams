@@ -63,6 +63,8 @@ sudo systemctl start ffmpeg_stream@testpattern-sport
 
 Dies lädt die Datei /etc/ffmpeg_streams/testpattern-sport.ini und übergibt sie an /usr/local/bin/ffmpeg_teststream.sh, das den passenden FFmpeg-Befehl ausführt.
 
+Alternativ geht das auch mit dem Skript `manage-teststreams.sh`  
+
 ## 📜 systemd Unit-Datei
 
 `/etc/systemd/system/ffmpeg_stream@.service`:
