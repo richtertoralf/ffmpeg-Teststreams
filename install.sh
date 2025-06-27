@@ -26,10 +26,10 @@ sudo systemctl daemon-reexec
 cd "$TMP_DIR"
 
 # 🐍 INI-Dateien automatisch erzeugen, falls ini-gen.py vorhanden ist
-if [ -f "$TMP_DIR/ini-gen.py" ]; then
+if [ -f "ini-gen.py" ]; then
   echo "🧾 Erzeuge INI-Dateien mit ini-gen.py..."
-  python3 "$TMP_DIR/ini-gen.py"
-  sudo cp "$TMP_DIR"/teststream_inis/*.ini "$CONFIG_DIR/"
+  python3 ini-gen.py
+  sudo cp teststream_inis/*.ini "$CONFIG_DIR/"
 else
   echo "⚠️ ini-gen.py nicht gefunden – keine INI-Dateien erzeugt."
 fi
