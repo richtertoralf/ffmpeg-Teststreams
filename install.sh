@@ -29,7 +29,6 @@ cd "$TMP_DIR"
 if [ -f "ini-gen.py" ]; then
   echo "🧾 Erzeuge INI-Dateien mit ini-gen.py..."
   python3 ini-gen.py
-  sudo cp teststream_inis/*.ini "$CONFIG_DIR/"
 else
   echo "⚠️ ini-gen.py nicht gefunden – keine INI-Dateien erzeugt."
 fi
