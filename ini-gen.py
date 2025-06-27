@@ -1,14 +1,10 @@
 from pathlib import Path
 
-# Konfiguration für jeden Streamtyp
 default_width = 1920
 default_height = 1080
 default_preset = "ultrafast"
-
-# Typen, die über den gemeinsamen FFmpeg-Audioblock laufen
 types_with_audio = {"basic", "motion", "smptebars", "sport"}
 
-# Definition der Teststream-Varianten
 streams = [
     ("testpattern-basic",       "basic",        30, "2M"),
     ("testpattern-smptebars",   "smptebars",    30, "3M"),
@@ -23,11 +19,9 @@ streams = [
     ("testpattern-scoreboard",  "scoreboard",   50, "4M")
 ]
 
-# Zielverzeichnis
-output_dir = Path("teststream_inis")
+output_dir = Path("/etc/ffmpeg_streams")
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# Dateien erzeugen
 for name, typ, fps, bitrate in streams:
     audio_enabled = "yes" if typ in types_with_audio else "no"
     content = f"""TYPE={typ}
