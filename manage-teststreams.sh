@@ -75,6 +75,26 @@ status_all() {
     done
 }
 
+show_help() {
+    cat << EOF
+Verwendung: $0 {list|running|start NAME|stop NAME|start-all|stop-all|status NAME|status-all|help}
+
+Befehle:
+  list             Zeigt alle verfügbaren Streams (INI-Dateien)
+  running          Zeigt alle derzeit laufenden Streams
+  start NAME       Startet den angegebenen Stream
+  stop NAME        Stoppt den angegebenen Stream
+  start-all        Startet alle verfügbaren Streams
+  stop-all         Stoppt alle laufenden Streams
+  status NAME      Zeigt den Status eines bestimmten Streams
+  status-all       Zeigt eine Statusübersicht aller Streams
+  help             Zeigt diese Hilfe
+
+Beispiel:
+  sudo $0 start testpattern-sport
+EOF
+}
+
 # Hauptlogik
 case "$1" in
     list)
@@ -101,7 +121,11 @@ case "$1" in
     status-all)
         status_all
         ;;
+    help|-h|--help)
+        show_help
+        ;;
     *)
-        echo "Verwendung: $0 {list|running|start NAME|stop NAME|start-all|stop-all|status NAME|status-all}"
+        echo "❓ Unbekannter Befehl: '$1'"
+        show_help
         ;;
 esac
