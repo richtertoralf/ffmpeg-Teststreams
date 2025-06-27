@@ -22,6 +22,9 @@ echo "🖇️ Installiere systemd Unit..."
 sudo cp "$TMP_DIR"/ffmpeg_stream@.service "$SYSTEMD_DIR/"
 sudo systemctl daemon-reexec
 
+# Wechsel ins geklonte Repo
+cd "$TMP_DIR"
+
 # 🐍 INI-Dateien automatisch erzeugen, falls ini-gen.py vorhanden ist
 if [ -f "$TMP_DIR/ini-gen.py" ]; then
   echo "🧾 Erzeuge INI-Dateien mit ini-gen.py..."
