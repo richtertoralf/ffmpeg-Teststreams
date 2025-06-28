@@ -6,6 +6,9 @@ Dieses Repository enthält ein Bash-Skript zur Erzeugung von FFmpeg-Teststreams 
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
 - Debian 12
+>Achtung: Bei Debian 12 ist nur FFmpeg 5.1.6 in den Paketquellen enthalten.
+>Der drawtext-Filter mit komplexen Expressions wie '%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}' nutzt Features, die erst ab libavfilter 9 (FFmpeg 6) sauber unterstützt werden.
+>FFmpeg 5.x hat bekannte Bugs/Limitierungen beim Parsen von Expressions mit eif, besonders bei mehrfachen %{}-Platzhaltern und Escapes.
 
 ## 🎯 Kompatible Streaming-Empfänger:
 - MediaMTX (SRT → HLS/WebRTC)
