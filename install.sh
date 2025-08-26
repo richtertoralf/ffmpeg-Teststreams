@@ -16,35 +16,19 @@ FILE_MAIN_SCRIPT="ffmpeg_teststream.sh"
 FILE_MANAGER="manage-teststreams.sh"
 FILE_SYSTEMD="ffmpeg_stream@.service"
 
-NON_INTERACTIVE="false"
-TARGET_HOST_ARG=""
-TARGET_PORT_ARG=""
-
 usage() {
   cat <<EOF
-Usage: sudo ./install.sh [--non-interactive] [--host 10.10.11.11] [--port 8890]
+Usage: sudo ./install.sh
 
-Optionen:
-  --non-interactive   Keine Abfragen (nutzt Defaults/Argumente)
-  --host <HOST>       Ziel-Host für neu zu erstellende streams.conf
-  --port <PORT>       Ziel-Port (Default 8890) für neu zu erstellende streams.conf
-  -h, --help          Hilfe
+Dieses Skript:
+  - installiert Skripte und systemd-Unit,
+  - erwartet eine vorhandene streams.conf:
+      * entweder bereits unter $CONF_FILE
+      * oder als Datei 'streams.conf' im Repo-Root
+  - erzeugt KEINE streams.conf mehr automatisch.
 EOF
   exit 0
 }
-
-# -------------------------------
-# Argumente
-# -------------------------------
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --non-interactive) NON_INTERACTIVE="true"; shift ;;
-    --host) TARGET_HOST_ARG="${2:-}"; shift 2 ;;
-    --port) TARGET_PORT_ARG="${2:-}"; shift 2 ;;
-    -h|--help) usage ;;
-    *) echo "Unbekanntes Argument: $1"; usage ;;
-  esac
-done
 
 # -------------------------------
 # Root prüfen
@@ -93,63 +77,17 @@ install -m 0644 "$TMP_DIR/$FILE_SYSTEMD" "$SYSTEMD_DIR/$FILE_SYSTEMD"
 systemctl daemon-reload
 
 # -------------------------------
-# streams.conf behandeln
-#   - Falls bereits vorhanden -> unverändert lassen
-#   - Falls nicht vorhanden:
-#       a) Wenn im Repo vorhanden: Vorlage kopieren
-#       b) Sonst: minimalen Standard generieren (mit Host/Port)
+# streams.conf bereitstellen (ohne Generierung)
 # -------------------------------
-RESOLVED_HOST="$TARGET_HOST_ARG"
-RESOLVED_PORT="${TARGET_PORT_ARG:-8890}"
-
-create_minimal_streams_conf() {
-  local host="$1" port="$2"
-  cat > "$CONF_FILE" <<EOF
-# ============================
-# /etc/ffmpeg_streams/streams.conf
-# ============================
-
-# Globale Defaults
-WIDTH=1920
-HEIGHT=1080
-PRESET=ultrafast
-DEFAULT_PORT=${port}
-
-# Streams (NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO)
-# AUDIO = yes nur für: basic, motion, smptebars, sport
-
-testpattern-basic;basic;30;2M;${host};${port};yes
-testpattern-smptebars;smptebars;30;3M;${host};${port};yes
-testpattern-motion;motion;30;4M;${host};${port};yes
-testpattern-noise;noise;30;5M;${host};${port};no
-testpattern-black;black;30;1M;${host};${port};no
-testpattern-clock;clock;30;3M;${host};${port};no
-testpattern-sport-motion;sport-motion;50;4M;${host};${port};no
-testpattern-smpte-noise;smpte-noise;30;2M;${host};${port};no
-testpattern-full-noise;full-noise;30;1M;${host};${port};no
-testpattern-sport;sport;60;2M;${host};${port};yes
-testpattern-scoreboard;scoreboard;50;4M;${host};${port};no
-EOF
-}
-
 if [[ -f "$CONF_FILE" ]]; then
-  echo "✅ $CONF_FILE existiert – unverändert belassen."
+  echo "✅ Bestehende $CONF_FILE gefunden – unverändert belassen."
+elif [[ -f "$TMP_DIR/streams.conf" ]]; then
+  echo "🧾 Kopiere streams.conf aus dem Repo nach $CONF_FILE ..."
+  install -m 0644 "$TMP_DIR/streams.conf" "$CONF_FILE"
 else
-  if [[ -f "$TMP_DIR/streams.conf" ]]; then
-    echo "🧾 Kopiere Vorlage streams.conf aus dem Repo nach $CONF_FILE ..."
-    install -m 0644 "$TMP_DIR/streams.conf" "$CONF_FILE"
-  else
-    if [[ -z "$RESOLVED_HOST" && "$NON_INTERACTIVE" != "true" ]]; then
-      echo "🔧 Ziel-Host (MediaMTX) für neue streams.conf:"
-      read -rp "TARGET_HOST [z. B. 10.10.11.11]: " RESOLVED_HOST
-      RESOLVED_HOST="${RESOLVED_HOST:-127.0.0.1}"
-      read -rp "TARGET_PORT [${RESOLVED_PORT}]: " _p
-      RESOLVED_PORT="${_p:-$RESOLVED_PORT}"
-    fi
-    [[ -z "$RESOLVED_HOST" ]] && RESOLVED_HOST="127.0.0.1"
-    echo "🧾 Erzeuge minimale $CONF_FILE mit Host=$RESOLVED_HOST Port=$RESOLVED_PORT ..."
-    create_minimal_streams_conf "$RESOLVED_HOST" "$RESOLVED_PORT"
-  fi
+  echo "❌ Keine streams.conf gefunden."
+  echo "   Erstelle eine streams.conf im Repo-Root ODER lege sie unter $CONF_FILE ab und starte das Skript erneut."
+  exit 1
 fi
 
 # -------------------------------
@@ -159,10 +97,9 @@ echo "🧾 Erzeuge INI-Dateien via $BIN_DIR/$FILE_INI_GEN ..."
 python3 "$BIN_DIR/$FILE_INI_GEN"
 
 # -------------------------------
-# Hinweise & Abschluss
+# Abschluss
 # -------------------------------
 echo "✅ Installation abgeschlossen."
-
 echo "ℹ️  Nützliche Befehle:"
 echo "   - Streams starten:   sudo manage-teststreams.sh start testpattern-sport"
 echo "   - Streams stoppen:   sudo manage-teststreams.sh stop  testpattern-sport"
