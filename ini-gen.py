@@ -1,41 +1,69 @@
+#!/usr/bin/env python3
 from pathlib import Path
 
-default_width = 1920
-default_height = 1080
-default_preset = "ultrafast"
-types_with_audio = {"basic", "motion", "smptebars", "sport"}
+CONF_FILE = Path("/etc/ffmpeg_streams/streams.conf")
+OUTPUT_DIR = Path("/etc/ffmpeg_streams")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-streams = [
-    ("testpattern-basic",       "basic",        30, "2M"),
-    ("testpattern-smptebars",   "smptebars",    30, "3M"),
-    ("testpattern-motion",      "motion",       30, "4M"),
-    ("testpattern-noise",       "noise",        30, "5M"),
-    ("testpattern-black",       "black",        30, "1M"),
-    ("testpattern-clock",       "clock",        30, "3M"),
-    ("testpattern-sport-motion","sport-motion", 50, "4M"),
-    ("testpattern-smpte-noise", "smpte-noise",  30, "2M"),
-    ("testpattern-full-noise",  "full-noise",   30, "1M"),
-    ("testpattern-sport",       "sport",        60, "2M"),
-    ("testpattern-scoreboard",  "scoreboard",   50, "4M")
-]
+def parse_conf(path: Path):
+    """
+    Liest die zentrale streams.conf.
+    - KEY=VALUE Zeilen => globale Defaults
+    - NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO => Stream-Definition
+    """
+    globals_ = {}
+    streams = []
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" in line and ";" not in line:
+            k, v = line.split("=", 1)
+            globals_[k.strip()] = v.strip()
+        elif ";" in line:
+            parts = [p.strip() for p in line.split(";")]
+            if len(parts) < 7:
+                raise ValueError(f"Ungültige Zeile in {path}: {line}")
+            name, typ, fps, bitrate, host, port, audio = parts
+            streams.append({
+                "NAME": name,
+                "TYPE": typ,
+                "FPS": fps,
+                "BITRATE": bitrate,
+                "HOST": host,
+                "PORT": port,
+                "AUDIO": audio.lower(),
+            })
+    return globals_, streams
 
-output_dir = Path("/etc/ffmpeg_streams")
-output_dir.mkdir(parents=True, exist_ok=True)
+def main():
+    if not CONF_FILE.exists():
+        raise SystemExit(f"❌ Config {CONF_FILE} nicht gefunden.")
 
-for name, typ, fps, bitrate in streams:
-    audio_enabled = "yes" if typ in types_with_audio else "no"
-    content = f"""TYPE={typ}
-FPS={fps}
-BITRATE={bitrate}
-WIDTH={default_width}
-HEIGHT={default_height}
-PRESET={default_preset}
-AUDIO_ENABLED={audio_enabled}
-TARGET_HOST=192.168.95.241
-TARGET_PORT=8890
-STREAM_ID={name}
-"""
-    ini_path = output_dir / f"{name}.ini"
-    ini_path.write_text(content)
+    globals_, streams = parse_conf(CONF_FILE)
 
-print(f"{len(streams)} INI-Dateien wurden erfolgreich generiert im Verzeichnis '{output_dir}'")
+    width = globals_.get("WIDTH", "1920")
+    height = globals_.get("HEIGHT", "1080")
+    preset = globals_.get("PRESET", "ultrafast")
+    default_port = globals_.get("DEFAULT_PORT", "8890")
+
+    for s in streams:
+        ini_text = (
+            f"TYPE={s['TYPE']}\n"
+            f"FPS={s['FPS']}\n"
+            f"BITRATE={s['BITRATE']}\n"
+            f"WIDTH={width}\n"
+            f"HEIGHT={height}\n"
+            f"PRESET={preset}\n"
+            f"AUDIO_ENABLED={s['AUDIO']}\n"
+            f"TARGET_HOST={s['HOST']}\n"
+            f"TARGET_PORT={s['PORT'] or default_port}\n"
+            f"STREAM_ID={s['NAME']}\n"
+        )
+        ini_path = OUTPUT_DIR / f"{s['NAME']}.ini"
+        ini_path.write_text(ini_text)
+
+    print(f"✅ {len(streams)} INI-Dateien wurden in '{OUTPUT_DIR}' erzeugt.")
+
+if __name__ == "__main__":
+    main()
