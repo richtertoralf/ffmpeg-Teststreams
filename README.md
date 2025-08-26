@@ -1,14 +1,16 @@
 # FFmpeg Teststreams mit systemd
 
-Dieses Repository enthält ein Bash-Skript zur Erzeugung von FFmpeg-Teststreams für verschiedene Anwendungszwecke. Die Streams werden über systemd als Dienste verwaltet und basieren auf `.ini`-Konfigurationsdateien.
+>Dieses Repository erzeugt und verwaltet FFmpeg-Teststreams per systemd.
+>Die Konfiguration erfolgt zentral über /etc/ffmpeg_streams/streams.conf.
+>Aus dieser Datei generiert ini-gen.py automatisch die einzelnen .ini-Dateien.
 
 ## 🧪 Getestet auf:
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
 - Debian 12
->Achtung: Bei Debian 12 ist nur FFmpeg 5.1.6 in den Paketquellen enthalten.
->Der drawtext-Filter mit komplexen Expressions wie '%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}' nutzt Features, die erst ab libavfilter 9 (FFmpeg 6) sauber unterstützt werden.
->FFmpeg 5.x hat bekannte Bugs/Limitierungen beim Parsen von Expressions mit eif, besonders bei mehrfachen %{}-Platzhaltern und Escapes.
+>Hinweis Debian 12:
+>In den Quellen ist FFmpeg 5.1.6. Komplexe drawtext-Expressions (z. B. '%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}') sind erst ab libavfilter 9 (FFmpeg 6+) zuverlässig.
+>FFmpeg 5.x hat bekannte Parser-Einschränkungen bei eif und mehrfachen %{}-Platzhaltern.
 
 ## 🎯 Kompatible Streaming-Empfänger:
 - MediaMTX (SRT → HLS/WebRTC)
@@ -22,53 +24,100 @@ Dieses Repository enthält ein Bash-Skript zur Erzeugung von FFmpeg-Teststreams 
 ```bash
 sudo apt update
 sudo apt install -y git ffmpeg python3 fonts-dejavu-core
-wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/main/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/main/install.sh | sudo bash
 ```
-Diese Befehle klonen das Repository, installieren alle benötigten Skripte, kopieren die systemd-Unit-Datei und erzeugen automatisch Beispiel-INI-Dateien.
+Die Installation:
+- kopiert Skripte und systemd-Unit
+- legt /etc/ffmpeg_streams/ an
+- kopiert die streams.conf aus dem Repo nach /etc/ffmpeg_streams/streams.conf
+- erzeugt daraus die .ini-Dateien
 
-## 🔧 Installation per Hand
+Passe danach bei Bedarf /etc/ffmpeg_streams/streams.conf an (z. B. Ziel-Host), und führe erneut aus:
+```
+sudo python3 /usr/local/bin/ini-gen.py
+```
+
+## 🔧 Manuelle Installation
 
 ```bash
-sudo mkdir -p /etc/ffmpeg_streams
-sudo cp ffmpeg_teststream.sh /usr/local/bin/
-sudo chmod +x /usr/local/bin/ffmpeg_teststream.sh
-sudo cp ffmpeg_stream@.service /etc/systemd/system/
-sudo systemctl daemon-reexec
+# Verzeichnis + zentrale Konfig
+sudo install -d -m 0755 /etc/ffmpeg_streams
+sudo install -m 0644 streams.conf /etc/ffmpeg_streams/streams.conf
+
+# Skripte
+sudo install -m 0755 ffmpeg_teststream.sh   /usr/local/bin/ffmpeg_teststream.sh
+sudo install -m 0755 manage-teststreams.sh  /usr/local/bin/manage-teststreams.sh
+sudo install -m 0755 ini-gen.py             /usr/local/bin/ini-gen.py
+
+# INIs aus streams.conf erzeugen (erst jetzt, damit Konfig sicher da ist)
+sudo python3 /usr/local/bin/ini-gen.py
+
+# systemd-Unit installieren und neu einlesen
+sudo install -m 0644 ffmpeg_stream@.service /etc/systemd/system/ffmpeg_stream@.service
+sudo systemctl daemon-reload
+
 ```
 
-## ⚙️ Konfiguration
-
-Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.
-
->Dazu kannst du auch das Skript https://github.com/richtertoralf/ffmpeg-Teststreams/blob/main/ini-gen.py verwenden.
+## ⚙️ Zentrale Konfiguration (streams.conf)
+Ort: /etc/ffmpeg_streams/streams.conf  
+Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.  
+**Format:**  
+- Globale Defaults als KEY=VALUE  
+- Pro Stream eine Zeile: NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO  
 
 **Beispiel:** `/etc/ffmpeg_streams/testpattern-sport.ini`
 
 ```ini
-TYPE=sport
-FPS=50
-BITRATE=2M
+# Globale Defaults
 WIDTH=1920
 HEIGHT=1080
 PRESET=ultrafast
-AUDIO_ENABLED=yes
-TARGET_HOST=192.168.95.241
-TARGET_PORT=8890
-STREAM_ID=testpattern-sport
-```
-Die Parameter WIDTH, HEIGHT, PRESET, AUDIO_ENABLED und DURATION sind optional. Falls sie fehlen, werden im Skript sinnvolle Standardwerte gesetzt.
+DEFAULT_PORT=8890
 
-## 🚀 Starten eines Streams
+# Streams (NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO)
+# AUDIO=yes typischerweise bei: basic, motion, smptebars, sport
+
+testpattern-basic;basic;30;2M;10.10.11.11;8890;yes
+testpattern-smptebars;smptebars;30;3M;10.10.11.11;8890;yes
+testpattern-motion;motion;30;4M;10.10.11.11;8890;yes
+testpattern-noise;noise;30;5M;10.10.11.11;8890;no
+testpattern-black;black;30;1M;10.10.11.11;8890;no
+testpattern-clock;clock;30;3M;10.10.11.11;8890;no
+testpattern-sport-motion;sport-motion;50;4M;10.10.11.11;8890;no
+testpattern-smpte-noise;smpte-noise;30;2M;10.10.11.11;8890;no
+testpattern-full-noise;full-noise;30;1M;10.10.11.11;8890;no
+testpattern-sport;sport;60;2M;10.10.11.11;8890;yes
+testpattern-scoreboard;scoreboard;50;4M;10.10.11.11;8890;no
+
+```
+Nach jeder Änderung an streams.conf:
+```
+sudo python3 /usr/local/bin/ini-gen.py
+
+```
+
+
+## 🚀 Streams starten/stoppen
 
 ```bash
 sudo systemctl start ffmpeg_stream@testpattern-sport
+sudo systemctl stop  ffmpeg_stream@testpattern-sport
+
+```
+Alternativ mit Helper:
+```
+sudo manage-teststreams.sh list        # alle verfügbaren Streams (.ini)
+sudo manage-teststreams.sh running     # aktuell aktive Dienste
+sudo manage-teststreams.sh start NAME
+sudo manage-teststreams.sh stop  NAME
+sudo manage-teststreams.sh status NAME
+sudo manage-teststreams.sh start-all
+sudo manage-teststreams.sh stop-all
+sudo manage-teststreams.sh status-all  # kompakt (✅ ⚠️ ❌ ❓)
+
 ```
 
-Dies lädt die Datei /etc/ffmpeg_streams/testpattern-sport.ini und übergibt sie an /usr/local/bin/ffmpeg_teststream.sh, das den passenden FFmpeg-Befehl ausführt.
-
-Alternativ geht das auch mit dem Skript `manage-teststreams.sh`  
-
-## 📜 systemd Unit-Datei
+## 📜 systemd-Template
 
 `/etc/systemd/system/ffmpeg_stream@.service`:
 
@@ -87,17 +136,37 @@ StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
+
+```
+## 🔗 Ablauf
+
+```swift
+systemd → ffmpeg_stream@<name>.service
+      → /usr/local/bin/ffmpeg_teststream.sh <name>
+      → /etc/ffmpeg_streams/<name>.ini (automatisch aus streams.conf erzeugt)
+      → ffmpeg mit passenden Filtern/Codecs/Ziel (SRT)
+
+```
+## 🔗 Zusammenspiel: systemd, Skript, INI
+
+```text
+systemd unit → ffmpeg_stream@<name>.service
+        ↓
+Bash-Skript → /usr/local/bin/ffmpeg_teststream.sh <name>
+        ↓
+INI-Datei → /etc/ffmpeg_streams/<name>.ini
+        ↓
+FFmpeg wird mit passenden Filtern, Codecs und Zielen ausgeführt
+```
+
+## 🐞 Diagnose
+```bash
+journalctl -u ffmpeg_stream@testpattern-sport.service -n 100 --no-pager
+
 ```
 
 ## 🛠 manage-teststreams.sh – Steuerung aller Teststreams
-Das Zusatzskript manage-teststreams.sh vereinfacht die Verwaltung aller FFmpeg-Teststreams, die per systemd als Dienst laufen. Es erkennt automatisch alle .ini-Dateien im Verzeichnis /etc/ffmpeg_streams/ und steuert die zugehörigen Dienste über systemctl.
 
-### 📦 Installation
-```bash
-sudo cp manage-teststreams.sh /usr/local/bin/
-sudo chmod +x /usr/local/bin/manage-teststreams.sh
-
-```
 ### 🧭 Verfügbare Befehle
 ```bash
 sudo manage-teststreams.sh list
@@ -126,35 +195,7 @@ sudo manage-teststreams.sh status-all
 
 ```
 
->Hinweis:  
->Alle Streams werden über die Template-Unit ffmpeg_stream@.service gestartet, z. B. ffmpeg_stream@testpattern-basic.service.  
->Die .ini-Dateien enthalten dabei Konfigurationsparameter wie TYPE, FPS, BITRATE, WIDTH, HEIGHT usw., die das Verhalten des Streams steuern.  
-
-## 🔗 Zusammenspiel: systemd, Skript, INI
-
-```text
-systemd unit → ffmpeg_stream@<name>.service
-        ↓
-Bash-Skript → /usr/local/bin/ffmpeg_teststream.sh <name>
-        ↓
-INI-Datei → /etc/ffmpeg_streams/<name>.ini
-        ↓
-FFmpeg wird mit passenden Filtern, Codecs und Zielen ausgeführt
-
-```
-- Das **systemd-Template** `ffmpeg_stream@.service` startet `/usr/local/bin/ffmpeg_teststream.sh <name>`
-- Das Bash-**Skript** liest die passende `.ini`-Datei aus `/etc/ffmpeg_streams/<name>.ini`
-- Die `.ini` enthält den Typ (z. B. `basic`, `motion`, `scoreboard`), Ziel-IP, Port und Bitrate
-- Je nach Typ wird ein anderer FFmpeg-Befehl ausgeführt
-
-## 🐞 Fehlerdiagnose
-```bash
-# Letzte Logs für einen Stream anzeigen
-journalctl -u ffmpeg_stream@testpattern-sport.service -n 50 --no-pager
-
-```
-
-## 🔍 Technischer Hinweis zu FFmpeg
+## 🔍 FFmpeg-Hinweise
 FFmpeg wird mit `-re` aufgerufen, um eine realistische Echtzeit-Wiedergabe zu gewährleisten. Du kannst durch Anpassung von `FPS` und `BITRATE` deine Testlast gezielt steuern.
 
 ### Beispielaufruf im Skript `ffmpeg_testsream.sh`
