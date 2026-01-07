@@ -1,8 +1,14 @@
 # FFmpeg Teststreams mit systemd
 
->Dieses Repository erzeugt und verwaltet FFmpeg-Teststreams per systemd.
->Die Konfiguration erfolgt zentral über /etc/ffmpeg_streams/streams.conf.
->Aus dieser Datei generiert ini-gen.py automatisch die einzelnen .ini-Dateien.
+> ✅ **Stabile Betriebsvariante**
+> Zentrale Konfiguration, systemd-Templates und reproduzierbare Streams – geeignet für Dauerbetrieb.
+
+Frühere experimentelle Skripte und Filter-Playgrounds sind im Archiv-Repository dokumentiert:  
+https://github.com/richtertoralf/testStreamGenerator
+
+> Dieses Repository erzeugt und verwaltet FFmpeg-Teststreams per systemd.
+> Die Konfiguration erfolgt zentral über /etc/ffmpeg_streams/streams.conf.
+> Aus dieser Datei generiert ini-gen.py automatisch die einzelnen .ini-Dateien.
 
 ## 🧪 Getestet auf:
 - Ubuntu 22.04 LTS
