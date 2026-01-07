@@ -1,9 +1,19 @@
 #!/bin/bash
 set -e
 
+
 # ============================================
-# FFmpeg Teststream Generator für SRT-Ausgabe
+# FFmpeg Stream Runner (Runtime)
 # ============================================
+#
+# Dieses Skript wird von den systemd-Diensten (ffmpeg_stream@.service) aufgerufen.
+# Es liest eine generierte Stream-INI aus /etc/ffmpeg_streams/<name>.ini
+# und startet den entsprechenden FFmpeg-Prozess.
+#
+# Die Konfigurationslogik (welche Streams existieren, Parameter, Defaults)
+# liegt in streams.conf und ini-gen.py.
+# Dieses Skript ist bewusst schlank und enthält keine eigene Persistenz.
+#
 # Aufruf: ./ffmpeg_teststream.sh <stream-name>
 # Erwartet eine .ini-Datei in /etc/ffmpeg_streams/<stream-name>.ini
 # mit folgenden Variablen:
