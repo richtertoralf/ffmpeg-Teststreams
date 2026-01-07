@@ -52,9 +52,8 @@ sudo apt update
 sudo apt install -y git ffmpeg python3 fonts-dejavu-core
 wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/main/install.sh | sudo bash
 
-# install.sh installiert Dateien, legt aber noch keine Dienste automatisch an und startet keine Streams.
-
 ```
+`install.sh` installiert Dateien, legt aber noch keine Dienste automatisch an und startet keine Streams.
 
 ### Quick Start (nach der Installation)
 
@@ -119,7 +118,7 @@ manage-teststreams.sh -h
 Das Installationsskript:
 
 - installiert Skripte und systemd-Unit-Dateien
-- erzeugt keine eigene Konfiguration
+- erzeugt keine eigene Konfiguration, sondern kopiert eine Beispiel-streams.conf
 - überschreibt keine bestehende streams.conf
 - ist idempotent und kann mehrfach ausgeführt werden
 - startet keine Streams automatisch
@@ -151,7 +150,6 @@ Bei der Installation wird eine Beispiel-`streams.conf` aus dem Repository nach
 `/etc/ffmpeg_streams/streams.conf` kopiert.
 
 Diese Datei ist als **Startpunkt** gedacht und sollte nicht unverändert produktiv verwendet werden.
-
 
 Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.  
 **Format:**  
@@ -190,6 +188,9 @@ Nach jeder Änderung an streams.conf:
 ```
 sudo python3 /usr/local/bin/ini-gen.py
 ```
+
+**Die erzeugten .ini-Dateien sind abgeleitete Artefakte und sollten nicht manuell bearbeitet werden.**
+
 
 ## Bedienung
 
