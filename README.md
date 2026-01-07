@@ -17,7 +17,8 @@ https://github.com/richtertoralf/testStreamGenerator
 > Aus dieser Datei generiert ini-gen.py automatisch die einzelnen .ini-Dateien.
 
 ## Beispiele
-Siehe **Examples.md** für Muster-Streams, Konfigurationsbeispiele und getestete Setups.
+Siehe **[Examples.md](./Examples.md)** für Muster-Streams, Konfigurationsbeispiele und getestete Setups.
+
 
 ## Getestet auf:
 - Ubuntu 22.04 LTS
