@@ -6,7 +6,7 @@
 ![systemd](https://img.shields.io/badge/systemd-template--unit-blue)
 
 
-> ✅ **Stabile Betriebsvariante**
+> **Stabile Betriebsvariante**
 > Zentrale Konfiguration, systemd-Templates und reproduzierbare Streams – geeignet für Dauerbetrieb.
 
 Frühere experimentelle Skripte und Filter-Playgrounds sind im Archiv-Repository dokumentiert:  
@@ -16,7 +16,7 @@ https://github.com/richtertoralf/testStreamGenerator
 > Die Konfiguration erfolgt zentral über /etc/ffmpeg_streams/streams.conf.
 > Aus dieser Datei generiert ini-gen.py automatisch die einzelnen .ini-Dateien.
 
-## 🧪 Getestet auf:
+## Getestet auf:
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
 - Debian 12
@@ -26,14 +26,14 @@ https://github.com/richtertoralf/testStreamGenerator
 > Komplexe drawtext-Expressions (z. B. '%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}') sind erst ab libavfilter 9 (FFmpeg 6+) zuverlässig.
 > FFmpeg 5.x hat bekannte Parser-Einschränkungen bei eif und mehrfachen %{}-Platzhaltern.
 
-## 🎯 Kompatible Streaming-Empfänger:
+## Kompatible Streaming-Empfänger:
 - MediaMTX (SRT → HLS/WebRTC)
 - Datarhei Restreamer
 - NGINX mit RTMP-Modul
 - Wowza Streaming Engine
 - OBS (als SRT-Receiver)
 
-## ⚡ Schnellinstallation
+## Schnellinstallation
 
 ```bash
 sudo apt update
@@ -51,7 +51,7 @@ Passe danach bei Bedarf /etc/ffmpeg_streams/streams.conf an (z. B. Ziel-Host), u
 sudo python3 /usr/local/bin/ini-gen.py
 ```
 
-## 🔧 Manuelle Installation
+## Manuelle Installation
 
 ```bash
 # Verzeichnis + zentrale Konfig
@@ -72,7 +72,7 @@ sudo systemctl daemon-reload
 
 ```
 
-## ⚙️ Zentrale Konfiguration (streams.conf)
+## Zentrale Konfiguration (streams.conf)
 Ort: /etc/ffmpeg_streams/streams.conf  
 Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.  
 **Format:**  
@@ -111,7 +111,7 @@ sudo python3 /usr/local/bin/ini-gen.py
 ```
 
 
-## 🚀 Streams starten/stoppen
+## Streams starten/stoppen
 
 ```bash
 sudo systemctl start ffmpeg_stream@testpattern-sport
