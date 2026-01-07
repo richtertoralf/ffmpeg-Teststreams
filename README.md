@@ -58,11 +58,9 @@ wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/mai
 
 ### Quick Start (nach der Installation)
 
-1. `streams.conf` anpassen
-2. INI-Dateien erzeugen:
-   sudo python3 /usr/local/bin/ini-gen.py
-3. Stream starten:
-   sudo manage-teststreams.sh start testpattern-sport
+1. Beispiel-`streams.conf` unter `/etc/ffmpeg_streams/streams.conf` anpassen
+2. INI-Dateien erzeugen: `sudo python3 /usr/local/bin/ini-gen.py`
+3. Stream starten: `sudo manage-teststreams.sh start testpattern-sport`
 
 ### Info
 
@@ -73,7 +71,11 @@ Die Installation:
 - kopiert streams.conf
 - erzeugt initial die .ini-Dateien
 
-**Die zentrale Konfiguration muss manuell angepasst werden.**
+**Die Installation kopiert eine Beispiel-`streams.conf` aus dem Repository nach `/etc/ffmpeg_streams/streams.conf`.**
+
+Diese Datei dient als Startkonfiguration und **muss anschließend an die eigene Umgebung angepasst werden**
+(z. B. Ziel-Host, Port, Anzahl und Typ der Streams).
+
 
 ## Bedienung
 **manage-teststreams.sh – Steuerung aller Teststreams**
@@ -144,7 +146,12 @@ sudo systemctl daemon-reload
 ```
 
 ## Zentrale Konfiguration (streams.conf)
-Pfad: /etc/ffmpeg_streams/streams.conf  
+
+Bei der Installation wird eine Beispiel-`streams.conf` aus dem Repository nach
+`/etc/ffmpeg_streams/streams.conf` kopiert.
+
+Diese Datei ist als **Startpunkt** gedacht und sollte nicht unverändert produktiv verwendet werden.
+
 
 Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.  
 **Format:**  
