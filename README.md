@@ -6,7 +6,7 @@
 ![systemd](https://img.shields.io/badge/systemd-template--unit-blue)
 
 
-> **Stabile Betriebsvariante**
+> **Stabile Betriebsvariante**  
 > Zentrale Konfiguration, systemd-Templates und reproduzierbare Streams – geeignet für Dauerbetrieb.
 
 Frühere experimentelle Skripte und Filter-Playgrounds sind im Archiv-Repository dokumentiert:  
