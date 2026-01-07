@@ -5,37 +5,45 @@
 ![FFmpeg](https://img.shields.io/badge/ffmpeg-%E2%89%A56.x-blue)
 ![systemd](https://img.shields.io/badge/systemd-template--unit-blue)
 
-
 > **Stabile Betriebsvariante**  
-> Zentrale Konfiguration, systemd-Templates und reproduzierbare Streams – geeignet für Dauerbetrieb.
+> Zentrale Konfiguration, systemd-Templates und reproduzierbare FFmpeg-Teststreams – geeignet für Dauerbetrieb.
 
-Frühere experimentelle Skripte und Filter-Playgrounds sind im Archiv-Repository dokumentiert:  
-https://github.com/richtertoralf/testStreamGenerator
+Frühere experimentelle Skripte, Filter-Playgrounds und Entwicklungsstufen sind im Archiv-Repository dokumentiert:  
+👉 https://github.com/richtertoralf/testStreamGenerator
 
-> Dieses Repository erzeugt und verwaltet FFmpeg-Teststreams per systemd.
-> Die Konfiguration erfolgt zentral über /etc/ffmpeg_streams/streams.conf.
-> Aus dieser Datei generiert ini-gen.py automatisch die einzelnen .ini-Dateien.
+Dieses Repository verwaltet FFmpeg-Teststreams **deklarativ** über systemd.
+Alle Streams werden zentral beschrieben und automatisch in systemd-Dienste überführt.
+
+---
 
 ## Beispiele
+
 Siehe **[Examples.md](./Examples.md)** für Muster-Streams, Konfigurationsbeispiele und getestete Setups.
 
+---
 
-## Getestet auf:
-- Ubuntu 22.04 LTS
-- Ubuntu 24.04 LTS
-- Debian 12
+## Getestet auf
 
-> Hinweis Debian 12:
-> In den Quellen ist FFmpeg 5.1.6.
-> Komplexe drawtext-Expressions (z. B. '%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}') sind erst ab libavfilter 9 (FFmpeg 6+) zuverlässig.
-> FFmpeg 5.x hat bekannte Parser-Einschränkungen bei eif und mehrfachen %{}-Platzhaltern.
+- Ubuntu 22.04 LTS  
+- Ubuntu 24.04 LTS  
+- Debian 12  
 
-## Kompatible Streaming-Empfänger:
-- MediaMTX (SRT → HLS/WebRTC)
+**Hinweis zu Debian 12:**  
+Die Paketquellen enthalten FFmpeg 5.1.6.  
+Komplexe `drawtext`-Expressions (z. B. mit `eif` oder mehrfachen `%{}`) sind erst ab **libavfilter 9 (FFmpeg 6+)** zuverlässig.  
+FFmpeg 5.x hat bekannte Parser-Einschränkungen.  
+
+---
+
+## Kompatible Streaming-Empfänger
+
+- MediaMTX (SRT → HLS / WebRTC)
 - Datarhei Restreamer
 - NGINX mit RTMP-Modul
 - Wowza Streaming Engine
-- OBS (als SRT-Receiver)
+- OBS Studio (als SRT-Receiver)
+
+---
 
 ## Schnellinstallation
 
@@ -44,16 +52,15 @@ sudo apt update
 sudo apt install -y git ffmpeg python3 fonts-dejavu-core
 wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/main/install.sh | sudo bash
 ```
-Die Installation:
-- kopiert Skripte und systemd-Unit
-- legt /etc/ffmpeg_streams/ an
-- kopiert die streams.conf aus dem Repo nach /etc/ffmpeg_streams/streams.conf
-- erzeugt daraus die .ini-Dateien
 
-Passe danach bei Bedarf /etc/ffmpeg_streams/streams.conf an (z. B. Ziel-Host), und führe erneut aus:
-```
-sudo python3 /usr/local/bin/ini-gen.py
-```
+Die Installation:
+- legt /etc/ffmpeg_streams/ an
+- installiert Skripte nach /usr/local/bin
+- installiert das systemd-Template
+- kopiert streams.conf
+- erzeugt initial die .ini-Dateien
+
+**Die Zentrale Konfiguraion muss per Hand druchgeführt werden!**
 
 ## Manuelle Installation
 
@@ -77,11 +84,15 @@ sudo systemctl daemon-reload
 ```
 
 ## Zentrale Konfiguration (streams.conf)
-Ort: /etc/ffmpeg_streams/streams.conf  
+Pfad: /etc/ffmpeg_streams/streams.conf  
+
 Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.  
 **Format:**  
-- Globale Defaults als KEY=VALUE  
-- Pro Stream eine Zeile: NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO  
+- globale Defaults als KEY=VALUE  
+- Pro Stream eine Zeile:
+```ini
+NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO  
+```
 
 **Beispiel:** `/etc/ffmpeg_streams/testpattern-sport.ini`
 
@@ -106,36 +117,55 @@ testpattern-smpte-noise;smpte-noise;30;2M;10.10.11.11;8890;no
 testpattern-full-noise;full-noise;30;1M;10.10.11.11;8890;no
 testpattern-sport;sport;60;2M;10.10.11.11;8890;yes
 testpattern-scoreboard;scoreboard;50;4M;10.10.11.11;8890;no
-
 ```
+
 Nach jeder Änderung an streams.conf:
 ```
 sudo python3 /usr/local/bin/ini-gen.py
-
 ```
 
+## Bedienung
 
-## Streams starten/stoppen
+Hinweis zu Berechtigungen
+
+* Das Helper-Skript selbst benötigt keine Root-Rechte
+* Root-Rechte sind nur erforderlich, wenn systemd-Dienste gestartet oder gestoppt werden
+* Es werden System-Units (/etc/systemd/system) verwendet
+
+### Mit systemd (direkt)
 
 ```bash
 sudo systemctl start ffmpeg_stream@testpattern-sport
 sudo systemctl stop  ffmpeg_stream@testpattern-sport
 
 ```
-Alternativ mit Helper:
-```
-sudo manage-teststreams.sh list        # alle verfügbaren Streams (.ini)
-sudo manage-teststreams.sh running     # aktuell aktive Dienste
-sudo manage-teststreams.sh start NAME
-sudo manage-teststreams.sh stop  NAME
-sudo manage-teststreams.sh status NAME
-sudo manage-teststreams.sh start-all
-sudo manage-teststreams.sh stop-all
-sudo manage-teststreams.sh status-all  # kompakt (✅ ⚠️ ❌ ❓)
+### Mit Helper-Skript
+```bash
+manage-teststreams.sh list
+manage-teststreams.sh status-all
+
+sudo manage-teststreams.sh start testpattern-sport
+sudo manage-teststreams.sh stop  testpattern-sport
 
 ```
 
-## 📜 systemd-Template
+## Architektur / Ablauf
+```text
+streams.conf
+   ↓
+ini-gen.py
+   ↓
+/etc/ffmpeg_streams/<name>.ini
+   ↓
+systemd template: ffmpeg_stream@.service
+   ↓
+ffmpeg_teststream.sh <name>
+   ↓
+FFmpeg → SRT / RTMP / MPEG-TS
+
+```
+
+## systemd-Template
 
 `/etc/systemd/system/ffmpeg_stream@.service`:
 
@@ -156,29 +186,11 @@ StandardError=journal
 WantedBy=multi-user.target
 
 ```
-## 🔗 Ablauf
 
-```swift
-systemd → ffmpeg_stream@<name>.service
-      → /usr/local/bin/ffmpeg_teststream.sh <name>
-      → /etc/ffmpeg_streams/<name>.ini (automatisch aus streams.conf erzeugt)
-      → ffmpeg mit passenden Filtern/Codecs/Ziel (SRT)
-
-```
-## 🔗 Zusammenspiel: systemd, Skript, INI
-
-```text
-systemd unit → ffmpeg_stream@<name>.service
-        ↓
-Bash-Skript → /usr/local/bin/ffmpeg_teststream.sh <name>
-        ↓
-INI-Datei → /etc/ffmpeg_streams/<name>.ini
-        ↓
-FFmpeg wird mit passenden Filtern, Codecs und Zielen ausgeführt
-```
 
 ## 🐞 Diagnose
 ```bash
+manage-teststreams.sh status testpattern-sport
 journalctl -u ffmpeg_stream@testpattern-sport.service -n 100 --no-pager
 
 ```
@@ -190,7 +202,7 @@ journalctl -u ffmpeg_stream@testpattern-sport.service -n 100 --no-pager
 manage-teststreams.sh list
 # Zeigt alle verfügbaren Streams (.ini-Dateien)
 
-sudo manage-teststreams.sh running
+manage-teststreams.sh running
 # Zeigt alle aktiven systemd-Dienste
 
 sudo manage-teststreams.sh start <name>
@@ -199,7 +211,7 @@ sudo manage-teststreams.sh start <name>
 sudo manage-teststreams.sh stop <name>
 # Stoppt den Stream
 
-sudo manage-teststreams.sh status <name>
+manage-teststreams.sh status <name>
 # Zeigt vollständigen systemctl status für diesen Stream
 
 sudo manage-teststreams.sh start-all
@@ -211,24 +223,8 @@ sudo manage-teststreams.sh stop-all
 manage-teststreams.sh status-all
 # Kompakter Status aller Streams (✅ ⚠️ ❌ ❓)
 
-sudo manage-teststreams.sh -h
-# zeigt folgende Hilfe an:
-Verwendung: /usr/local/bin/manage-teststreams.sh {list|running|start NAME|stop NAME|start-all|stop-all|status NAME|status-all|help}
-
-Befehle:
-  list             Zeigt alle verfügbaren Streams (INI-Dateien)
-  running          Zeigt alle derzeit laufenden Streams
-  start NAME       Startet den angegebenen Stream
-  stop NAME        Stoppt den angegebenen Stream
-  start-all        Startet alle verfügbaren Streams
-  stop-all         Stoppt alle laufenden Streams
-  status NAME      Zeigt den Status eines bestimmten Streams
-  status-all       Zeigt eine Statusübersicht aller Streams
-  help             Zeigt diese Hilfe
-
-Beispiel:
-  sudo /usr/local/bin/manage-teststreams.sh start testpattern-sport
-
+manage-teststreams.sh -h
+# zeigt Hilfe an:
 
 ```
 
