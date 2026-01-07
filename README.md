@@ -52,6 +52,8 @@ sudo apt update
 sudo apt install -y git ffmpeg python3 fonts-dejavu-core
 wget -qO- https://raw.githubusercontent.com/richtertoralf/ffmpeg-Teststreams/main/install.sh | sudo bash
 
+# install.sh installiert Dateien, legt aber noch keine Dienste automatisch an und startet keine Streams.
+
 ```
 
 ### Quick Start (nach der Installation)
@@ -104,7 +106,7 @@ manage-teststreams.sh status-all
 # Kompakter Status aller Streams (✅ ⚠️ ❌ ❓)
 
 manage-teststreams.sh -h
-# zeigt Hilfe an:
+# zeigt die integrierte Hilfe
 
 ```
 
