@@ -16,6 +16,9 @@ https://github.com/richtertoralf/testStreamGenerator
 > Die Konfiguration erfolgt zentral über /etc/ffmpeg_streams/streams.conf.
 > Aus dieser Datei generiert ini-gen.py automatisch die einzelnen .ini-Dateien.
 
+## Beispiele
+Siehe **Examples.md** für Muster-Streams, Konfigurationsbeispiele und getestete Setups.
+
 ## Getestet auf:
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
