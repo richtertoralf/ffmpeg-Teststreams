@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-# LEGACY SCRIPT
-# Früher Stream-Runner mit eingebauter Stream-Logik.
-# Wird durch streams.conf + ini-gen.py + systemd-Template ersetzt.
-
 # ============================================
 # FFmpeg Teststream Generator für SRT-Ausgabe
 # ============================================
