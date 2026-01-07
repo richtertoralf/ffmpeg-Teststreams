@@ -276,7 +276,6 @@ WantedBy=multi-user.target
 
 ```
 
-
 ## 🐞 Diagnose
 ```bash
 manage-teststreams.sh status testpattern-sport
@@ -284,12 +283,11 @@ journalctl -u ffmpeg_stream@testpattern-sport.service -n 100 --no-pager
 
 ```
 
-
-
 ## 🔍 FFmpeg-Hinweise
 FFmpeg wird mit `-re` aufgerufen, um eine realistische Echtzeit-Wiedergabe zu gewährleisten. Du kannst durch Anpassung von `FPS` und `BITRATE` deine Testlast gezielt steuern.
 
-### Beispielaufruf im Skript `ffmpeg_testsream.sh`
+### Beispielaufruf im Skript `ffmpeg_teststream.sh`
+
 ```bash
     ffmpeg -re "${VIDEO_ARGS[@]}" "${AUDIO_ARGS[@]}" \
         -vcodec libx264 -preset "$PRESET" -pix_fmt yuv420p -b:v "$BITRATE" \
