@@ -112,6 +112,18 @@ manage-teststreams.sh -h
 
 ## Manuelle Installation
 
+### install.sh
+
+Das Installationsskript:
+
+- installiert Skripte und systemd-Unit-Dateien
+- erzeugt keine eigene Konfiguration
+- überschreibt keine bestehende streams.conf
+- ist idempotent und kann mehrfach ausgeführt werden
+- startet keine Streams automatisch
+
+
+
 ```bash
 # Verzeichnis + zentrale Konfig
 sudo install -d -m 0755 /etc/ffmpeg_streams
