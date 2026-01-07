@@ -1,5 +1,11 @@
 # FFmpeg Teststreams mit systemd
 
+![Status](https://img.shields.io/badge/status-stable-brightgreen)
+![Operation](https://img.shields.io/badge/operation-continuous-green)
+![FFmpeg](https://img.shields.io/badge/ffmpeg-%E2%89%A56.x-blue)
+![systemd](https://img.shields.io/badge/systemd-template--unit-blue)
+
+
 > ✅ **Stabile Betriebsvariante**
 > Zentrale Konfiguration, systemd-Templates und reproduzierbare Streams – geeignet für Dauerbetrieb.
 
@@ -14,9 +20,11 @@ https://github.com/richtertoralf/testStreamGenerator
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
 - Debian 12
->Hinweis Debian 12:
->In den Quellen ist FFmpeg 5.1.6. Komplexe drawtext-Expressions (z. B. '%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}') sind erst ab libavfilter 9 (FFmpeg 6+) zuverlässig.
->FFmpeg 5.x hat bekannte Parser-Einschränkungen bei eif und mehrfachen %{}-Platzhaltern.
+
+> Hinweis Debian 12:
+> In den Quellen ist FFmpeg 5.1.6.
+> Komplexe drawtext-Expressions (z. B. '%{pts\:hms} LIVE SCORE: %{eif\:random(100)}-%{eif\:random(100)}') sind erst ab libavfilter 9 (FFmpeg 6+) zuverlässig.
+> FFmpeg 5.x hat bekannte Parser-Einschränkungen bei eif und mehrfachen %{}-Platzhaltern.
 
 ## 🎯 Kompatible Streaming-Empfänger:
 - MediaMTX (SRT → HLS/WebRTC)
