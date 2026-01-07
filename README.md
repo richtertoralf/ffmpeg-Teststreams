@@ -187,7 +187,7 @@ journalctl -u ffmpeg_stream@testpattern-sport.service -n 100 --no-pager
 
 ### 🧭 Verfügbare Befehle
 ```bash
-sudo manage-teststreams.sh list
+manage-teststreams.sh list
 # Zeigt alle verfügbaren Streams (.ini-Dateien)
 
 sudo manage-teststreams.sh running
@@ -208,8 +208,27 @@ sudo manage-teststreams.sh start-all
 sudo manage-teststreams.sh stop-all
 # Stoppt alle laufenden Streams
 
-sudo manage-teststreams.sh status-all
+manage-teststreams.sh status-all
 # Kompakter Status aller Streams (✅ ⚠️ ❌ ❓)
+
+sudo manage-teststreams.sh -h
+# zeigt folgende Hilfe an:
+Verwendung: /usr/local/bin/manage-teststreams.sh {list|running|start NAME|stop NAME|start-all|stop-all|status NAME|status-all|help}
+
+Befehle:
+  list             Zeigt alle verfügbaren Streams (INI-Dateien)
+  running          Zeigt alle derzeit laufenden Streams
+  start NAME       Startet den angegebenen Stream
+  stop NAME        Stoppt den angegebenen Stream
+  start-all        Startet alle verfügbaren Streams
+  stop-all         Stoppt alle laufenden Streams
+  status NAME      Zeigt den Status eines bestimmten Streams
+  status-all       Zeigt eine Statusübersicht aller Streams
+  help             Zeigt diese Hilfe
+
+Beispiel:
+  sudo /usr/local/bin/manage-teststreams.sh start testpattern-sport
+
 
 ```
 
