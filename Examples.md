@@ -61,10 +61,9 @@ ffmpeg -re -f lavfi -i testsrc=size=1920x1080:rate=30 \
        -an \
        -f mpegts srt://192.168.0.10:8895
 
-# 7️⃣ testpattern-sport-motion – Interpolation für Sport
+# 7️⃣ testpattern-sport-motion – Bewegung mit hoher Bildrate
 ffmpeg -re -f lavfi -i testsrc2=size=1920x1080:rate=50 \
-       -vf "minterpolate='mc_mode=mi',format=yuv420p" \
-       -vcodec libx264 -preset veryfast -b:v 4M \
+       -vcodec libx264 -preset veryfast -pix_fmt yuv420p -b:v 4M \
        -an \
        -f mpegts srt://192.168.0.10:8896
 
@@ -107,7 +106,7 @@ ffmpeg -re -f lavfi -i testsrc2=size=1920x1080:rate=50 \
 | `testpattern-noise`        | Rauschüberlagerung       | 🔧 Stresstest für Encoder               |
 | `testpattern-black`        | Schwarzbild              | ✅ Platzhalter, Latenzprüfung            |
 | `testpattern-clock`        | Uhrzeit eingeblendet     | ✅ Synchronisations-/Latenzvergleiche    |
-| `testpattern-sport-motion` | Bewegung + Interpolation | ✅ Realistischer Sportstream, hohe Last  |
+| `testpattern-sport-motion` | Bewegung mit hoher FPS   | ✅ Sportstream ohne Interpolation        |
 | `testpattern-smpte-noise`  | Zellmuster + Balken      | 🔧 Decoder-/Bandbreiten-Stresstest      |
 | `testpattern-full-noise`   | Rauschen (grau)          | 🔧 Worst-case Encoding                  |
 | `testpattern-sport`        | Sport-Testbild + Ton     | ✅ Typischer SRT-Teststream mit Ton      |

@@ -89,7 +89,7 @@ case "$TYPE" in
         VIDEO_ARGS=(-re -f lavfi -i "testsrc=size=${WIDTH}x${HEIGHT}:rate=${FPS},drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{localtime}':fontsize=60:fontcolor=white:x=100:y=100")
         ;;
     sport-motion)
-        VIDEO_ARGS=(-re -f lavfi -i "testsrc2=size=${WIDTH}x${HEIGHT}:rate=${FPS},minterpolate=mc_mode=aobmc:vsbmc=1,format=yuv420p")
+        VIDEO_ARGS=(-re -f lavfi -i "testsrc2=size=${WIDTH}x${HEIGHT}:rate=${FPS}")
         ;;
     smpte-noise)
         VIDEO_ARGS=(

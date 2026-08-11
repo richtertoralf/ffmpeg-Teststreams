@@ -92,6 +92,14 @@ if grep -qi 'duration' "$basic_args" || grep -q 'DURATION' "$REPO_DIR/ffmpeg_tes
 fi
 pass "basic enthält keine feste duration"
 
+sport_motion_args="$TEST_TMP/ffmpeg-sport-motion.args"
+grep -qx 'testsrc2=size=1920x1080:rate=30' "$sport_motion_args" || \
+    fail "sport-motion nutzt testsrc2 mit konfigurierter Auflösung und FPS"
+if grep -qi 'minterpolate' "$sport_motion_args" || grep -A2 '^[[:space:]]*sport-motion)' "$REPO_DIR/ffmpeg_teststream.sh" | grep -qi 'minterpolate'; then
+    fail "sport-motion verwendet kein minterpolate"
+fi
+pass "sport-motion nutzt testsrc2 ohne minterpolate"
+
 grep -q '^-nostats$' "$basic_args" || fail "FFmpeg-Fortschrittsausgaben sind reduziert"
 grep -q '^warning$' "$basic_args" || fail "FFmpeg-Warnungen bleiben sichtbar"
 grep -q '^[[:space:]]*exec ffmpeg ' "$REPO_DIR/ffmpeg_teststream.sh" || fail "Runner ersetzt sich durch FFmpeg"
