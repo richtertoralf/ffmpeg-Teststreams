@@ -94,6 +94,9 @@ sudo manage-teststreams.sh start <name>
 sudo manage-teststreams.sh stop <name>
 # Stoppt den Stream
 
+sudo manage-teststreams.sh restart <name>
+# Startet den Stream neu
+
 manage-teststreams.sh status <name>
 # Zeigt vollständigen systemctl status für diesen Stream
 
@@ -102,6 +105,9 @@ sudo manage-teststreams.sh start-all
 
 sudo manage-teststreams.sh stop-all
 # Stoppt alle laufenden Streams
+
+sudo manage-teststreams.sh restart-all
+# Startet alle konfigurierten Streams neu
 
 manage-teststreams.sh status-all
 # Kompakter Status aller Streams (✅ ⚠️ ❌ ❓)
@@ -284,12 +290,13 @@ journalctl -u ffmpeg_stream@testpattern-sport.service -n 100 --no-pager
 ```
 
 ## 🔍 FFmpeg-Hinweise
-FFmpeg wird mit `-re` aufgerufen, um eine realistische Echtzeit-Wiedergabe zu gewährleisten. Du kannst durch Anpassung von `FPS` und `BITRATE` deine Testlast gezielt steuern.
+Alle Standardquellen laufen unbegrenzt. FFmpeg erhält `-re` für jede Video- und Audioeingabe, damit beide Medienarten in Echtzeit erzeugt werden. Du kannst durch Anpassung von `FPS` und `BITRATE` deine Testlast gezielt steuern.
 
 ### Beispielaufruf im Skript `ffmpeg_teststream.sh`
 
 ```bash
-    ffmpeg -re "${VIDEO_ARGS[@]}" "${AUDIO_ARGS[@]}" \
+    exec ffmpeg -hide_banner -nostats -loglevel warning \
+        "${VIDEO_ARGS[@]}" "${AUDIO_ARGS[@]}" \
         -vcodec libx264 -preset "$PRESET" -pix_fmt yuv420p -b:v "$BITRATE" \
         -f mpegts "$URL"
 ```

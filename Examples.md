@@ -20,22 +20,22 @@ Diese Sammlung zeigt konkrete FFmpeg-Befehle zur Erzeugung von Teststreams. Die 
 
 ```bash
 # 1️⃣ testpattern-basic – statisches Bild + Sinuston
-ffmpeg -re -f lavfi -i testsrc=duration=3600:size=1920x1080:rate=30 \
-       -f lavfi -i sine=frequency=1000:sample_rate=44100 \
+ffmpeg -re -f lavfi -i testsrc=size=1920x1080:rate=30 \
+       -re -f lavfi -i sine=frequency=1000:sample_rate=44100 \
        -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v 2M \
        -c:a aac -b:a 128k -ar 44100 \
        -f mpegts srt://192.168.0.10:8890
 
 # 2️⃣ testpattern-smptebars – SMPTE-Balken + Ton
 ffmpeg -re -f lavfi -i smptebars=size=1920x1080:rate=30 \
-       -f lavfi -i sine=frequency=1000 \
+       -re -f lavfi -i sine=frequency=1000 \
        -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v 3M \
        -c:a aac -b:a 128k \
        -f mpegts srt://192.168.0.10:8891
 
 # 3️⃣ testpattern-motion – bewegtes Testbild
 ffmpeg -re -f lavfi -i testsrc2=size=1920x1080:rate=30 \
-       -f lavfi -i sine=frequency=1000 \
+       -re -f lavfi -i sine=frequency=1000 \
        -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -b:v 4M \
        -c:a aac -b:a 128k \
        -f mpegts srt://192.168.0.10:8892
@@ -84,7 +84,7 @@ ffmpeg -re -f lavfi -i noise=size=1920x1080:rate=30:flags=grey \
 
 # 🔟 testpattern-sport – Bewegung + Sinus-Ton
 ffmpeg -re -f lavfi -i testsrc2=size=1920x1080:rate=50 \
-       -f lavfi -i sine=frequency=1000 \
+       -re -f lavfi -i sine=frequency=1000 \
        -vcodec libx264 -preset ultrafast -b:v 2M \
        -c:a aac -b:a 128k \
        -f mpegts srt://192.168.0.10:8899
