@@ -23,7 +23,7 @@ set -e
 #   - FPS (z. B. 25, 30, 50)
 #   - BITRATE (z. B. 2M)
 #
-# Optional: WIDTH, HEIGHT, AUDIO_ENABLED, PRESET
+# Optional: WIDTH, HEIGHT, AUDIO_ENABLED, PRESET, SRT_LATENCY_MS
 
 if [ "$#" -ne 1 ] || [ -z "$1" ]; then
     echo "❌ Usage: $0 <stream-name>" >&2
@@ -51,13 +51,21 @@ for required_var in TYPE TARGET_HOST TARGET_PORT STREAM_ID; do
 done
 
 # Standardwerte setzen
-URL="srt://${TARGET_HOST}:${TARGET_PORT}?streamid=publish:${STREAM_ID}&pkt_size=1316"
 PRESET=${PRESET:-ultrafast}
 WIDTH=${WIDTH:-1920}
 HEIGHT=${HEIGHT:-1080}
 FPS=${FPS:-30}
 BITRATE=${BITRATE:-2M}
 AUDIO_ENABLED=${AUDIO_ENABLED:-yes}
+SRT_LATENCY_MS=${SRT_LATENCY_MS:-2000}
+
+if ! [[ "$SRT_LATENCY_MS" =~ ^[0-9]+$ ]] || [ "$SRT_LATENCY_MS" -le 0 ]; then
+    echo "❌ Invalid SRT_LATENCY_MS in $CONFIG: '$SRT_LATENCY_MS' (expected a positive integer in milliseconds)" >&2
+    exit 1
+fi
+
+SRT_LATENCY_US=$((SRT_LATENCY_MS * 1000))
+URL="srt://${TARGET_HOST}:${TARGET_PORT}?streamid=publish:${STREAM_ID}&pkt_size=1316&latency=${SRT_LATENCY_US}"
 
 # Infoausgabe
 echo "🎬 Starting FFmpeg stream: $NAME"

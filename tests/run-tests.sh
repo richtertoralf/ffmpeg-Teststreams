@@ -26,6 +26,24 @@ assert_fails() {
     pass "$description"
 }
 
+generate_inis() {
+    config_file="$1"
+    output_dir="$2"
+    python3 - "$REPO_DIR" "$config_file" "$output_dir" <<'PY'
+import importlib.util
+import sys
+from pathlib import Path
+
+repo_dir, config_file, output_dir = map(Path, sys.argv[1:])
+spec = importlib.util.spec_from_file_location("ini_gen", repo_dir / "ini-gen.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+module.CONF_FILE = config_file
+module.OUTPUT_DIR = output_dir
+module.main()
+PY
+}
+
 mkdir -p "$TEST_TMP/bin" "$TEST_TMP/config"
 
 cat >"$TEST_TMP/bin/ffmpeg" <<'EOF'
@@ -87,6 +105,10 @@ pass "alle 11 Standardvideoquellen sind unbegrenzt"
 pass "alle Video- und Audioinputs werden in Echtzeit aufgebaut"
 
 basic_args="$TEST_TMP/ffmpeg-basic.args"
+grep -qx 'srt://127.0.0.1:8890?streamid=publish:basic&pkt_size=1316&latency=2000000' "$basic_args" || \
+    fail "Runner rechnet die Standardlatenz in Mikrosekunden um"
+pass "FFmpeg-SRT-URL enthält 2000000 Mikrosekunden Standardlatenz"
+
 if grep -qi 'duration' "$basic_args" || grep -q 'DURATION' "$REPO_DIR/ffmpeg_teststream.sh"; then
     fail "basic enthält keine feste duration"
 fi
@@ -115,6 +137,59 @@ EOF
 assert_fails "Runner erkennt fehlende Pflichtwerte" env PATH="$TEST_TMP/bin:$PATH" \
     CONFIG_DIR="$TEST_TMP/config" FFMPEG_ARGS_FILE="$TEST_TMP/incomplete.args" \
     bash "$REPO_DIR/ffmpeg_teststream.sh" incomplete
+
+cat >"$TEST_TMP/config/invalid-latency.ini" <<'EOF'
+TYPE=basic
+TARGET_HOST=127.0.0.1
+TARGET_PORT=8890
+STREAM_ID=invalid-latency
+SRT_LATENCY_MS=invalid
+EOF
+assert_fails "Runner erkennt ungültige SRT-Latenz" env PATH="$TEST_TMP/bin:$PATH" \
+    CONFIG_DIR="$TEST_TMP/config" FFMPEG_ARGS_FILE="$TEST_TMP/invalid-latency.args" \
+    bash "$REPO_DIR/ffmpeg_teststream.sh" invalid-latency
+
+mkdir -p "$TEST_TMP/generated"
+cat >"$TEST_TMP/streams.conf" <<'EOF'
+WIDTH=1920
+HEIGHT=1080
+PRESET=ultrafast
+DEFAULT_PORT=8890
+SRT_LATENCY_MS=2000
+seven-fields;basic;30;2M;127.0.0.1;8890;yes
+empty-override;basic;30;2M;127.0.0.1;8890;yes;
+custom-latency;basic;30;2M;127.0.0.1;8890;yes;500
+EOF
+generate_inis "$TEST_TMP/streams.conf" "$TEST_TMP/generated" >"$TEST_TMP/generator-output"
+grep -qx 'SRT_LATENCY_MS=2000' "$TEST_TMP/generated/seven-fields.ini" || \
+    fail "7-Felder-Stream erhält globale SRT-Latenz"
+grep -qx 'SRT_LATENCY_MS=2000' "$TEST_TMP/generated/empty-override.ini" || \
+    fail "leeres achtes Feld erhält globale SRT-Latenz"
+grep -qx 'SRT_LATENCY_MS=500' "$TEST_TMP/generated/custom-latency.ini" || \
+    fail "Stream-spezifische SRT-Latenz überschreibt globalen Wert"
+pass "Generator unterstützt globale und Stream-spezifische SRT-Latenz"
+pass "bestehendes 7-Felder-Format bleibt kompatibel"
+
+PATH="$TEST_TMP/bin:$PATH" CONFIG_DIR="$TEST_TMP/generated" \
+    FFMPEG_ARGS_FILE="$TEST_TMP/custom-latency.args" \
+    bash "$REPO_DIR/ffmpeg_teststream.sh" custom-latency >"$TEST_TMP/custom-runner-output"
+grep -qx 'srt://127.0.0.1:8890?streamid=publish:custom-latency&pkt_size=1316&latency=500000' \
+    "$TEST_TMP/custom-latency.args" || fail "individuelle SRT-Latenz wird in Mikrosekunden umgerechnet"
+pass "individuelle SRT-Latenz erreicht die FFmpeg-URL in Mikrosekunden"
+
+cat >"$TEST_TMP/invalid-streams.conf" <<'EOF'
+SRT_LATENCY_MS=0
+invalid;basic;30;2M;127.0.0.1;8890;yes
+EOF
+assert_fails "Generator erkennt ungültige globale SRT-Latenz" \
+    generate_inis "$TEST_TMP/invalid-streams.conf" "$TEST_TMP/generated"
+
+cat >"$TEST_TMP/invalid-stream-latency.conf" <<'EOF'
+SRT_LATENCY_MS=2000
+invalid;basic;30;2M;127.0.0.1;8890;yes;-1
+EOF
+assert_fails "Generator erkennt ungültige Stream-spezifische SRT-Latenz" \
+    generate_inis "$TEST_TMP/invalid-stream-latency.conf" "$TEST_TMP/generated"
 
 touch "$TEST_TMP/config/alpha.ini" "$TEST_TMP/config/beta.ini"
 export SYSTEMCTL_LOG="$TEST_TMP/systemctl.log"

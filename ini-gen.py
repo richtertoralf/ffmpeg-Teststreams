@@ -9,7 +9,8 @@ def parse_conf(path: Path):
     """
     Liest die zentrale streams.conf.
     - KEY=VALUE Zeilen => globale Defaults
-    - NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO => Stream-Definition
+    - NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO[;SRT_LATENCY_MS]
+      => Stream-Definition
     """
     globals_ = {}
     streams = []
@@ -22,9 +23,9 @@ def parse_conf(path: Path):
             globals_[k.strip()] = v.strip()
         elif ";" in line:
             parts = [p.strip() for p in line.split(";")]
-            if len(parts) < 7:
+            if len(parts) not in (7, 8):
                 raise ValueError(f"Ungültige Zeile in {path}: {line}")
-            name, typ, fps, bitrate, host, port, audio = parts
+            name, typ, fps, bitrate, host, port, audio = parts[:7]
             streams.append({
                 "NAME": name,
                 "TYPE": typ,
@@ -33,8 +34,19 @@ def parse_conf(path: Path):
                 "HOST": host,
                 "PORT": port,
                 "AUDIO": audio.lower(),
+                "SRT_LATENCY_MS": parts[7] if len(parts) == 8 else "",
             })
     return globals_, streams
+
+
+def validate_latency(value: str, source: str):
+    if not value.isdigit() or int(value) <= 0:
+        raise ValueError(
+            f"Ungültiger SRT_LATENCY_MS-Wert in {source}: {value!r} "
+            "(erwartet: positiver Integer in Millisekunden)"
+        )
+    return value
+
 
 def main():
     if not CONF_FILE.exists():
@@ -46,8 +58,15 @@ def main():
     height = globals_.get("HEIGHT", "1080")
     preset = globals_.get("PRESET", "ultrafast")
     default_port = globals_.get("DEFAULT_PORT", "8890")
+    global_srt_latency_ms = validate_latency(
+        globals_.get("SRT_LATENCY_MS", "2000"), "globaler Konfiguration"
+    )
 
     for s in streams:
+        srt_latency_ms = validate_latency(
+            s["SRT_LATENCY_MS"] or global_srt_latency_ms,
+            f"Stream {s['NAME']}",
+        )
         ini_text = (
             f"TYPE={s['TYPE']}\n"
             f"FPS={s['FPS']}\n"
@@ -59,6 +78,7 @@ def main():
             f"TARGET_HOST={s['HOST']}\n"
             f"TARGET_PORT={s['PORT'] or default_port}\n"
             f"STREAM_ID={s['NAME']}\n"
+            f"SRT_LATENCY_MS={srt_latency_ms}\n"
         )
         ini_path = OUTPUT_DIR / f"{s['NAME']}.ini"
         ini_path.write_text(ini_text)

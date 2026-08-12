@@ -160,9 +160,9 @@ Diese Datei ist als **Startpunkt** gedacht und sollte nicht unverändert produkt
 Erzeuge für jeden Stream eine .ini-Datei im Verzeichnis /etc/ffmpeg_streams/.  
 **Format:**  
 - globale Defaults als KEY=VALUE  
-- Pro Stream eine Zeile:
+- Pro Stream eine Zeile (die SRT-Latenz am Ende ist optional):
 ```ini
-NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO  
+NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO[;SRT_LATENCY_MS]
 ```
 
 **Beispiel:** `/etc/ffmpeg_streams/testpattern-sport.ini`
@@ -173,11 +173,13 @@ WIDTH=1920
 HEIGHT=1080
 PRESET=ultrafast
 DEFAULT_PORT=8890
+SRT_LATENCY_MS=2000
 
-# Streams (NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO)
+# Streams (NAME;TYPE;FPS;BITRATE;TARGET_HOST;TARGET_PORT;AUDIO[;SRT_LATENCY_MS])
 # AUDIO=yes typischerweise bei: basic, motion, smptebars, sport
 
-testpattern-basic;basic;30;2M;10.10.11.11;8890;yes
+testpattern-basic;basic;30;2M;10.77.0.108;8890;yes
+testpattern-basic-wg;basic;30;2M;172.16.90.123;8890;yes;2000
 testpattern-smptebars;smptebars;30;3M;10.10.11.11;8890;yes
 testpattern-motion;motion;30;4M;10.10.11.11;8890;yes
 testpattern-noise;noise;30;5M;10.10.11.11;8890;no
@@ -189,6 +191,12 @@ testpattern-full-noise;full-noise;30;1M;10.10.11.11;8890;no
 testpattern-sport;sport;60;2M;10.10.11.11;8890;yes
 testpattern-scoreboard;scoreboard;50;4M;10.10.11.11;8890;no
 ```
+
+`SRT_LATENCY_MS` gibt die SRT-Latenz bewusst in Millisekunden an. Der globale
+Default beträgt 2000 ms und gilt für Streams im bisherigen 7-Felder-Format sowie
+bei einem leeren achten Feld. Ein positiver ganzzahliger Wert im optionalen achten
+Feld überschreibt ihn für den jeweiligen Stream, etwa `500` für 500 ms. Der erste
+Beispielstream zeigt ein lokales Ziel, der zweite einen WireGuard-/WAN-Teststream.
 
 Nach jeder Änderung an streams.conf:
 ```
